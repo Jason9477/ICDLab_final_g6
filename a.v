@@ -19,6 +19,12 @@ module LK (
     reg [5:0]counter ;
     reg [20:0] Ix2;
     reg [20:0] Iy2;
+    reg signed [8:0]Ix_now ;
+    reg signed [8:0] Iy_now ;
+    reg signed [8:0] It_now;
+    wire [15:0] Ix_now2 = Ix_now * Ix_now;
+    wire [15:0] Iy_now2 = Iy_now * Iy_now;
+    //================================沒用
     wire signed [8:0] Ix_0 = Ix[0];
     wire signed [8:0] Ix_1 = Ix[1];
     wire signed [8:0] Ix_2 = Ix[2];
@@ -34,7 +40,6 @@ module LK (
     wire signed [8:0] Ix_12 = Ix[12];
     wire signed [8:0] Ix_13 = Ix[13];
     wire signed [8:0] Ix_14 = Ix[14];
-    
     wire [7:0] img1_0 = img1[0];
     wire [7:0] img1_1 = img1[1];
     wire [7:0] img1_2 = img1[2];
@@ -86,15 +91,11 @@ module LK (
     wire [8:0] Iy_14 = Iy[14];
     wire [8:0] Iy_15 = Iy[15];
     wire [8:0] Iy_16 = Iy[16];
+//================================
 
-reg signed [8:0]Ix_now ;
-reg signed [8:0] Iy_now ;
-reg signed [8:0] It_now;
-wire [15:0] Ix_now2 = Ix_now * Ix_now;
-wire [15:0] Iy_now2 = Iy_now * Iy_now;
-wire Ix_en = (col_reg !=1) && (col_reg !=0) && (row_reg !=0 && row_reg !=6);
-wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1);
-wire It_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=6);
+wire Ix_en = (col_reg !=1) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 Ix
+wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //什麼時候要計算 Iy
+wire It_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 It
 always @(*) begin
     Ix_now =  a - img1[(row_reg)*7 + col_reg - 2];
 end
@@ -117,21 +118,21 @@ always @(posedge clk) begin
         It[(row_reg-1)*5 + col_reg - 1]  <= It_now;
     end
 end
-always @(posedge clk or negedge rst_n) begin
-    if(~rst_n) begin
-        Ix2 <= 0;
-    end else if(Ix_en) begin
-            Ix2 <= Ix2 + Ix_now2;
-        end
-end
+
+
 
 always @(posedge clk or negedge rst_n) begin
     if(~rst_n) begin
         Iy2 <= 0;
-    end else
+        Ix2 <= 0;
+    end else begin
     if(Iy_en) begin
             Iy2 <= Iy2 + Iy_now2;
         end
+    if(Ix_en) begin
+            Ix2 <= Ix2 + Ix_now2;
+        end
+    end
 end
 
 
