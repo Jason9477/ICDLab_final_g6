@@ -196,18 +196,18 @@ module tb;
         a=0;
         b=0;
     end
-    always #5 clk = ~clk; // Clock generation
+    always #`HCYCLE clk = ~clk; // Clock generation
 integer i;
     initial begin
         $readmemh("input.txt", data_mem);
         rst_n = 0; // Reset active
 
-        #10; // Wait for reset to be released
+        #`CYCLE; // Wait for reset to be released
 
         rst_n = 1; // Release reset
         for (i = 0; i < 49; i = i + 1) begin
                 {a, b} = data_mem[i];
-                #10;   // 一個 cycle
+                #`CYCLE;   // 一個 cycle
             end
         
 
