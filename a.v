@@ -17,8 +17,11 @@ module LK (
     reg signed [8:0] It[0:24];
     reg signed [8:0] Iy[0:24];
     reg [5:0]counter ;
-    reg [20:0] Ix2;
-    reg [20:0] Iy2;
+    reg [21:0] Ix2;
+    reg [21:0] Iy2;
+    reg signed [21:0] IxIy;
+    reg signed [21:0] IxIt;
+    reg signed [21:0] IyIt;
     reg signed [8:0]Ix_now ;
     reg signed [8:0] Iy_now ;
     reg signed [8:0] It_now;
@@ -105,7 +108,7 @@ end
 always @(*) begin
     It_now =  b - a;
 end
-
+wire signed [15:0] IxIt_now = Ix_now*It[(row_reg-1)*5 + col_reg-2];
 
 always @(posedge clk) begin
     if(Iy_en) begin
@@ -125,12 +128,14 @@ always @(posedge clk or negedge rst_n) begin
     if(~rst_n) begin
         Iy2 <= 0;
         Ix2 <= 0;
+        IxIt <= 0;
     end else begin
     if(Iy_en) begin
             Iy2 <= Iy2 + Iy_now2;
         end
     if(Ix_en) begin
             Ix2 <= Ix2 + Ix_now2;
+            IxIt<= IxIt + IxIt_now;
         end
     end
 end
