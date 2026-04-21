@@ -9,7 +9,8 @@
 
 
 
-y.py可以生input pattern line19:random_seed(42)暫固定
+pattern.py可以生input pattern line19:random_seed(42)暫固定
+sphere資料夾內有實際測資
 為方便tb寫在同一檔案  
 gtkwave無法看packed signal(array) 故以wire展開部分
 input form:  
