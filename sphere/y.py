@@ -6,8 +6,8 @@ import cv2
 # =========================
 # 讀影像（IMPORTANT：不要用 int8）
 # =========================
-im1 = cv2.imread("sphere/sphere_gray.0.png", cv2.IMREAD_GRAYSCALE).astype(np.int16)
-im2 = cv2.imread("sphere/sphere_gray.2.png", cv2.IMREAD_GRAYSCALE).astype(np.int16)
+im1 = cv2.imread("sphere_gray.0.png", cv2.IMREAD_GRAYSCALE).astype(np.int16)
+im2 = cv2.imread("sphere_gray.2.png", cv2.IMREAD_GRAYSCALE).astype(np.int16)
 
 H, W = im1.shape
 
