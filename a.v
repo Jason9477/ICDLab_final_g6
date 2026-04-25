@@ -19,7 +19,7 @@ module LK (
     // reg signed [8:0] It[0:24];
     reg signed [8:0] It[0:4];
     // reg signed [8:0] Iy[0:24];
-    reg [5:0]counter ;
+    // reg [5:0]counter ;
     reg [21:0] Ix2;
     reg [21:0] Iy2;
     reg signed [21:0] IxIy;
@@ -103,10 +103,9 @@ module LK (
 // wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //什麼時候要計算 Iy
 // wire It_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 It
 wire Ix_shift = (col_reg !=0) && (row_reg !=0); //什麼時候要 shift Ix
-wire Ix2_en = Ix_shift && (col_reg !=1) && (row_reg !=6); //什麼時候要計算 Ix^2
-wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //什麼時候要計算 Iy 相關的 summation
+wire Ix_en = Ix_shift && (col_reg !=1) && (row_reg !=6); //什麼時候要計算 Ix^2 IxIt
+wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //什麼時候要計算 Iy^2 IxIy IyIt 
 wire It_shift = (col_reg !=6) && (col_reg !=0) && (row_reg !=0); //什麼時候要 shift It
-wire IxIt_en = It_shift && (row_reg !=6); //什麼時候要計算 IxIt
 
 always @(*) begin
     // Ix_now =  a - img1[(row_reg)*7 + col_reg - 2];
@@ -121,33 +120,57 @@ always @(*) begin
 end
 // wire signed [15:0] IxIt_now = Ix_now*It[(row_reg-1)*5 + col_reg-2];
 wire signed [15:0] IxIt_now = Ix_now*It[4];
+wire signed [15:0] IyIt_now = Iy_now*It[0];
+wire signed [15:0] IxIy_now = Iy_now*Ix[0];
 
-always @(posedge clk) begin
-    if(Iy_en) begin
-        Iy[(row_reg-2)*5 + col_reg -1]  <= Iy_now;
+// shift registers
+integer j;
+always @(posedge clk or negedge rst_n) begin
+    if(~rst_n) begin 
+        for(j = 0; j < 14; j = j + 1) begin 
+            img1[j] <= 0;
+        end
+        for(j = 0; j < 5; j = j + 1) begin 
+            Ix[j] <= 0;
+            It[j] <= 0;
+        end
     end
-    // if(Ix_en) begin
-    //     Ix[(row_reg-1)*5 + col_reg -2]  <= Ix_now;
-    // end
-    if(Ix_shift) begin
-        Ix[(row_reg-1)*5 + col_reg -2]  <= Ix_now;
-    end
+    
+    else begin
+        for(j = 0; j <= 12; j = j + 1) begin 
+            img1[j] <= img1[j + 1];
+        end 
+        img1[13] <= a;
 
-    if(It_en) begin
-        It[(row_reg-1)*5 + col_reg - 1]  <= It_now;
+        if(Ix_shift) begin
+            for(j = 0; j <= 3; j = j + 1) begin 
+                Ix[j] <= Ix[j + 1];     
+            end
+            Ix[4] <= Ix_now;    
+        end
+
+        if(It_shift) begin
+            for(j = 0; j <= 3; j = j + 1) begin 
+                It[j] <= It[j + 1];     
+            end
+            It[4] <= It_now;    
+        end
     end
 end
 
-
-
+// summaiton
 always @(posedge clk or negedge rst_n) begin
     if(~rst_n) begin
         Iy2 <= 0;
         Ix2 <= 0;
         IxIt <= 0;
+        IyIt <= 0;
+        IxIy <= 0;
     end else begin
     if(Iy_en) begin
             Iy2 <= Iy2 + Iy_now2;
+            IxIy <= IxIy + IxIy_now;
+            IyIt <= IyIt + IyIt_now;
         end
     if(Ix_en) begin
             Ix2 <= Ix2 + Ix_now2;
@@ -156,34 +179,24 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-
-
-integer  i;
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            for (i = 0; i < 49; i = i + 1) begin
-                img1[i] <= 8'b0;
-            end
-            row_reg <= 0;
-            col_reg <= 0;
-            counter <= 0;
-        end else begin
-            img1[counter] <= a;
-            counter <= counter + 1;
-            if (col_reg == 6) begin // 0 到 6 代表 7 個數
-            col_reg <= 0;
-                if (row_reg == 6) begin
-                    row_reg <= 0;
-                end else begin
-                    row_reg <= row_reg + 1;
-                end
+// input matrix index
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        row_reg <= 0;
+        col_reg <= 0;
+    end else begin
+        if (col_reg == 6) begin // 0 到 6 代表 7 個數
+        col_reg <= 0;
+            if (row_reg == 6) begin
+                row_reg <= 0;
             end else begin
-                col_reg <= col_reg + 1;
+                row_reg <= row_reg + 1;
             end
+        end else begin
+            col_reg <= col_reg + 1;
         end
-            
-        
-    end
+    end    
+end
 
 
 
