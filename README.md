@@ -2,7 +2,7 @@
 刪掉不用的東西，用imput_combined.txt當input tb  
 //=============0425====================  
 完成 week 9 報告中的計算順序架構:
-shift registers (img1 Ix It)
+shift registers (img1 Ix It)  
 summation (Ix^2 Iy^2 IxIy IxIt IyIt)
 //=============0420====================  
 完成算sum(IxIt),sum(IyIt),sum(IxIy)
