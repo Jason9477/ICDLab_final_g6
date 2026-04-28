@@ -3,33 +3,33 @@
 `define HCYCLE (`CYCLE/2.0)
 
 
-module LK (
+module LK #(parameter width = 8)(
     input clk,
     input rst_n,
-    input [7:0] a,
-    input [7:0] b,
+    input [width-1:0] a,
+    input [width-1:0] b,
     output reg [15:0] c
 );
     // reg [7:0] img1[0:48] ;
-    reg [7:0] img1[0:13] ;
+    reg [width-1:0] img1[0:13] ;
     reg [3:0] row_reg;
     reg [3:0] col_reg;
     // reg signed [8:0] Ix[0:24];
-    reg signed [8:0] Ix[0:4];
+    reg signed [width:0] Ix[0:4];
     // reg signed [8:0] It[0:24];
-    reg signed [8:0] It[0:4];
+    reg signed [width:0] It[0:4];
     // reg signed [8:0] Iy[0:24];
     // reg [5:0]counter ;
-    reg [21:0] Ix2;
-    reg [21:0] Iy2;
-    reg signed [21:0] IxIy;
-    reg signed [21:0] IxIt;
-    reg signed [21:0] IyIt;
-    reg signed [8:0] Ix_now ;
-    reg signed [8:0] Iy_now ;
-    reg signed [8:0] It_now;
-    wire [15:0] Ix_now2 = Ix_now * Ix_now;
-    wire [15:0] Iy_now2 = Iy_now * Iy_now;
+    reg signed[2*width+3:0] Ix2;
+    reg signed[2*width+3:0] Iy2;
+    reg signed [2*width+3:0] IxIy;
+    reg signed [2*width+3:0] IxIt;
+    reg signed [2*width+3:0] IyIt;
+    reg signed [width:0] Ix_now ;
+    reg signed [width:0] Iy_now ;
+    reg signed [width:0] It_now;
+    wire [width*2:0] Ix_now2 = Ix_now * Ix_now;
+    wire [width*2:0] Iy_now2 = Iy_now * Iy_now;
 
 
 // wire Ix_en = (col_reg !=1) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 Ix
@@ -52,14 +52,15 @@ always @(*) begin
     It_now =  b - a;
 end
 // wire signed [15:0] IxIt_now = Ix_now*It[(row_reg-1)*5 + col_reg-2];
-wire signed [15:0] IxIt_now = Ix_now*It[4];
-wire signed [15:0] IyIt_now = Iy_now*It[0];
-wire signed [15:0] IxIy_now = Iy_now*Ix[0];
-
-wire signed [] Ux = (Iy2 * IxIt) - (IxIy * IyIt);
-wire signed [] Uy = (Ix2 * IyIt) - (IxIy * IxIt);
-wire signed [] det = (Ix2 * Iy2) - (IxIy * IxIy);
-reciprocal();
+wire signed [2*width+1:0] IxIt_now = Ix_now*It[4];
+wire signed [2*width+1:0] IyIt_now = Iy_now*It[0];
+wire signed [2*width+1:0] IxIy_now = Iy_now*Ix[0];
+wire signed[4*width+7:0] Ix2_ext = Ix2;
+wire signed[4*width+7:0] Iy2_ext = Iy2;
+wire signed [4*width+7:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
+wire signed [4*width+7:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
+wire signed [4*width+7:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
+// reciprocal();
 
 
 
