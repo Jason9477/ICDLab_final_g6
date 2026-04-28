@@ -56,6 +56,14 @@ wire signed [15:0] IxIt_now = Ix_now*It[4];
 wire signed [15:0] IyIt_now = Iy_now*It[0];
 wire signed [15:0] IxIy_now = Iy_now*Ix[0];
 
+wire signed [] Ux = (Iy2 * IxIt) - (IxIy * IyIt);
+wire signed [] Uy = (Ix2 * IyIt) - (IxIy * IxIt);
+wire signed [] det = (Ix2 * Iy2) - (IxIy * IxIy);
+reciprocal();
+
+
+
+
 // shift registers
 integer j;
 always @(posedge clk or negedge rst_n) begin
@@ -130,8 +138,6 @@ always @(posedge clk or negedge rst_n) begin
         end
     end    
 end
-
-
 
 endmodule
 
