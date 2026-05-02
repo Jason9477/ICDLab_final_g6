@@ -20,16 +20,16 @@ module LK #(parameter width = 8)(
     reg signed [width:0] It[0:4];
     // reg signed [8:0] Iy[0:24];
     // reg [5:0]counter ;
-    reg signed[2*width+3:0] Ix2;
-    reg signed[2*width+3:0] Iy2;
-    reg signed [2*width+3:0] IxIy;
-    reg signed [2*width+3:0] IxIt;
-    reg signed [2*width+3:0] IyIt;
+    reg signed[2*width+6:0] Ix2;
+    reg signed[2*width+6:0] Iy2;
+    reg signed [2*width+6:0] IxIy;
+    reg signed [2*width+6:0] IxIt;
+    reg signed [2*width+6:0] IyIt;
     reg signed [width:0] Ix_now ;
     reg signed [width:0] Iy_now ;
     reg signed [width:0] It_now;
-    wire [width*2:0] Ix_now2 = Ix_now * Ix_now;
-    wire [width*2:0] Iy_now2 = Iy_now * Iy_now;
+    wire [width*2+1:0] Ix_now2 = Ix_now * Ix_now;//18 = 9+9
+    wire [width*2+1:0] Iy_now2 = Iy_now * Iy_now;
 
 
 // wire Ix_en = (col_reg !=1) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 Ix
@@ -55,11 +55,11 @@ end
 wire signed [2*width+1:0] IxIt_now = Ix_now*It[4];
 wire signed [2*width+1:0] IyIt_now = Iy_now*It[0];
 wire signed [2*width+1:0] IxIy_now = Iy_now*Ix[0];
-wire signed[4*width+7:0] Ix2_ext = Ix2;
-wire signed[4*width+7:0] Iy2_ext = Iy2;
-wire signed [4*width+7:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
-wire signed [4*width+7:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
-wire signed [4*width+7:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
+wire signed[4*width+13:0] Ix2_ext = Ix2;
+wire signed[4*width+13:0] Iy2_ext = Iy2;
+wire signed [4*width+13:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
+wire signed [4*width+13:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
+wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
 // reciprocal();
 
 
