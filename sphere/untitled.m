@@ -99,7 +99,7 @@ for i = (1+w):stride:(H-w)
         max_val = max(abs([raw_Ix2, raw_Iy2, raw_IxIy, raw_IxIt, raw_IyIt]));
 
         % 計算需要右移幾位才能讓最大值進入 15-bit（signed 16-bit 正數最多15bit）
-        if max_val <= 4095
+        if max_val <= 32767
             shift_amt = 0;
         else
             shift_amt = floor(log2(max_val)) - 14;  % 14 = 15-1
@@ -149,14 +149,32 @@ for i = (1+w):stride:(H-w)
             adj_22 =  ATA(1,1);
             
             % --- 矩陣乘法 ATb ---
-            temp_Vx = adj_11 * ATb(1) + adj_12 * ATb(2);
-            temp_Vy = adj_21 * ATb(1) + adj_22 * ATb(2);
+            V_num_x = adj_11 * ATb(1) + adj_12 * ATb(2);
+            V_num_y = adj_21 * ATb(1) + adj_22 * ATb(2);
             
             % --- 使用 Shift 取代除法 ---
             % 這裡考慮符號位，並向右位移 k 位
-            Vx_raw = bitshift(int32(temp_Vx * sign_detA), 4 - k);
-            Vy_raw = bitshift(int32(temp_Vy * sign_detA), 4 - k);
-                        % 
+            F = 8;   % fractional bits (Q?.8)
+            
+            % --- scale ---
+            % Vx_tmp = bitshift(int32(temp_Vx * sign_detA), F - k);
+            % Vy_tmp = bitshift(int32(temp_Vy * sign_detA), F - k);
+            shift_amount = k - 4;
+            
+            if shift_amount >= 0
+                % 右移的情況
+                Vx_fixed = int32(V_num_x) / (2^shift_amount);
+                Vy_fixed = int32(V_num_y) / (2^shift_amount);
+            else
+                % 左移的情況 (當 k < 4 時)
+                Vx_fixed = int32(V_num_x) * (2^abs(shift_amount));
+                Vy_fixed = int32(V_num_y) * (2^abs(shift_amount));
+            end
+        
+            % 3. 轉回 double 驗證 (除以 16 是因為後 4 位是小數)
+            Vx_raw = double(Vx_fixed) / 16;
+            Vy_raw = double(Vy_fixed) / 16;
+                                    % 
             % --- 門檻限制 (Thresholding) ---
             if (abs(Vx_raw) > 5 || abs(Vy_raw) > 5)
                 Vx(i,j) = 0;
