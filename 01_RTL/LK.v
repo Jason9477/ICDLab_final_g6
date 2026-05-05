@@ -1,14 +1,10 @@
-`timescale 1ns/10ps
-`define CYCLE 10
-`define HCYCLE (`CYCLE/2.0)
-
-
 module LK #(parameter width = 8)(
     input clk,
     input rst_n,
     input [width-1:0] a,
     input [width-1:0] b,
-    output reg [15:0] c
+    output wire [4*width+13:0] Vx,
+    output wire [4*width+13:0] Vy
 );
     // reg [7:0] img1[0:48] ;
     reg [width-1:0] img1[0:13] ;
@@ -61,6 +57,8 @@ wire signed[4*width+13:0] Iy2_ext = Iy2;
 wire signed [4*width+13:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
 wire signed [4*width+13:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
 wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
+assign Vx = Ux;
+assign Vy = Uy;
 // reciprocal();
 
 
