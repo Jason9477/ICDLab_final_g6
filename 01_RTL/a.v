@@ -8,7 +8,8 @@ module LK #(parameter width = 8)(
     input rst_n,
     input [width-1:0] a,
     input [width-1:0] b,
-    output reg [15:0] c
+    output reg [7:0] Vx,
+    output reg [7:0] Vy
 );
     // reg [7:0] img1[0:48] ;
     reg [width-1:0] img1[0:13] ;
@@ -61,9 +62,25 @@ wire signed[4*width+13:0] Iy2_ext = Iy2;
 wire signed [4*width+13:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
 wire signed [4*width+13:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
 wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
-// reciprocal();
+wire [4*width+12:0] det_abs = det[4*width+13]? (-det) : det;
+wire [$clog2(4*width+13)-1 : 0] LOD_pos;
+wire LOD_valid;
+LOD #(.W(4*width+13)) L1(.in(det_abs), .pos(LOD_pos), .valid(LOD_valid));
+wire signed [4*width+20:0] Ux_pad0 = {{4{Ux[4*width+13]}}, Ux, 3'b0};
+wire signed [4*width+20:0] Uy_pad0 = {{4{Uy[4*width+13]}}, Uy, 3'b0};
+wire signed [7 : 0] result_x = (det[4*width+13])? -signed(Ux_pad0[LOD_pos + 4 -: 8]) : signed(Ux_pad0[LOD_pos + 4 -: 8]);
+wire signed [7 : 0] result_y = (det[4*width+13])? -signed(Uy_pad0[LOD_pos + 4 -: 8]) : signed(Uy_pad0[LOD_pos + 4 -: 8]);
+always @(*) begin 
+    if(~LOD_valid || result_x > $signed(8'b0101_0000) || result_x < $signed(8'b1011_0000)) begin 
+        Vx = 8'b0;
+    end
+    else Vx = result_x;
 
-
+    if(~LOD_valid || result_x > $signed(8'b0101_0000) || result_x < $signed(8'b1011_0000)) begin 
+        Vy = 8'b0;
+    end
+    else Vy = result_y;
+end
 
 
 // shift registers
@@ -143,6 +160,40 @@ end
 
 endmodule
 
+// Leading One Detector
+module LOD #(
+    parameter W = 11
+)(
+    input [W - 1 : 0] in,
+    output [$clog2(W) - 1 : 0] pos,
+    output valid
+);
+    localparam W_pow2 = 1 << $clog2(W);
+    wire [W_pow2-1 : 0] in_pad;
+    generate
+        if(W_pow2 == W) begin: no_padding_zeros
+            assign in_pad = in;
+        end
+        else begin: padding_zeros
+            assign in_pad = {{(W_pow2 - W){1'b0}}, in};
+        end
+
+        if(W_pow2 == 2) begin: base_case
+            assign valid = in_pad[1] | in_pad[0];
+            assign pos = in_pad[1];
+        end
+        else begin: recursive_case
+            wire left_valid, right_valid;
+            wire [$clog2(W_pow2/2) - 1 : 0] left_pos, right_pos;
+
+            LOD #(.W(W_pow2/2)) LOD_left(.in(in_pad[W_pow2 - 1 : W_pow2/2]), .pos(left_pos), .valid(left_valid));
+            LOD #(.W(W_pow2/2)) LOD_right(.in(in_pad[W_pow2/2 - 1 : 0]), .pos(right_pos), .valid(right_valid));
+
+            assign valid = left_valid | right_valid;
+            assign pos = (left_valid)? {1'b1, left_pos} : {1'b0, right_pos};
+        end
+    endgenerate
+endmodule
 
 
 module tb;
