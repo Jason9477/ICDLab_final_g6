@@ -59,7 +59,7 @@ wire signed [2*width-1:0] IxIt_shift7 = IxIt >>> 7;
 wire signed [2*width-1:0] IyIt_shift7 = IyIt >>> 7;
 wire signed [4*width+1:0] Ux = -(Iy2_shift7 * IxIt_shift7) + (IxIy_shift7 * IyIt_shift7); //-(197316*36516)+(-156086*-15534) =-4780551168
 wire signed [4*width+1:0] Uy = -(Ix2_shift7 * IyIt_shift7)+ (IxIy_shift7 * IxIt_shift7);//-(341126*-15534) + (-156086*36516)
-wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
+// wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
 assign Vx = Ux;
 assign Vy = Uy;
 // reciprocal();
