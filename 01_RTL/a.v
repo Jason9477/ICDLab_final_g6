@@ -68,8 +68,8 @@ wire LOD_valid;
 LOD #(.W(4*width+13)) L1(.in(det_abs), .pos(LOD_pos), .valid(LOD_valid));
 wire signed [4*width+20:0] Ux_pad0 = {{4{Ux[4*width+13]}}, Ux, 3'b0};
 wire signed [4*width+20:0] Uy_pad0 = {{4{Uy[4*width+13]}}, Uy, 3'b0};
-wire signed [7 : 0] result_x = (det[4*width+13])? -$signed(Ux_pad0[LOD_pos + 4 -: 8]) : signed(Ux_pad0[LOD_pos + 4 -: 8]);
-wire signed [7 : 0] result_y = (det[4*width+13])? -$signed(Uy_pad0[LOD_pos + 4 -: 8]) : signed(Uy_pad0[LOD_pos + 4 -: 8]);
+wire signed [7 : 0] result_x = (det[4*width+13])? -$signed(Ux_pad0[LOD_pos + 4 -: 8]) : $signed(Ux_pad0[LOD_pos + 4 -: 8]);
+wire signed [7 : 0] result_y = (det[4*width+13])? -$signed(Uy_pad0[LOD_pos + 4 -: 8]) : $signed(Uy_pad0[LOD_pos + 4 -: 8]);
 always @(*) begin 
     if(~LOD_valid || result_x > $signed(8'b0101_0000) || result_x < $signed(8'b1011_0000)) begin 
         Vx = 8'b0;
