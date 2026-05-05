@@ -15,13 +15,13 @@ set default_schematic_options {-size infinite}
 ############################################
 # import design
 ############################################
-set DESIGN "GSIM"
+set DESIGN "LK"
 
 set hdlin_translate_off_skip_text "TRUE"
 set edifout_netlist_only "TRUE"
 set verilogout_no_tri true
 
-analyze -format verilog "../01_RTL/GSIM.v"
+analyze -format verilog "../01_RTL/LK.v"
 elaborate $DESIGN
 link
 
@@ -35,7 +35,7 @@ check_timing > check_timing.txt
 ############################################
 # source sdc
 ############################################
-source -echo -verbose ./GSIM_DC.sdc
+source -echo -verbose ./LK_DC.sdc
 
 
 ############################################
