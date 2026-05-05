@@ -3,8 +3,8 @@ clc; clear;
 % =========================
 % 讀影像
 % =========================
-file1 = 's0_pad.png';
-file2 = 's0_s_pad.png';
+file1 = 'basketball1.png';
+file2 = 'basketball2.png';
 
 im1 = double(imread(file1));
 im2 = double(imread(file2));
@@ -14,10 +14,10 @@ im2 = double(imread(file2));
 % =========================
 % window / stride
 % =========================
-window_size = 5;
+window_size =5;
 w = floor(window_size / 2);
-stride = 5;
-
+stride = 5
+mul=1
 % =========================
 % gradient
 % =========================
@@ -29,10 +29,28 @@ for i = 2:H-1
     for j = 2:W-1
         Ix(i,j) = im1(i, j+1) - im1(i, j-1);
         Iy(i,j) = im1(i+1, j) - im1(i-1, j);
-        It(i,j) = im2(i, j) - im1(i, j);
+        It(i,j) = (im2(i, j) - im1(i, j))/2;
     end
 end
-
+% for i = 2:H-1
+%     for j = 2:W-1
+% 
+%         % Sobel X
+%         Ix(i,j) = ...
+%             -1*im1(i-1,j-1) + 0*im1(i-1,j) + 1*im1(i-1,j+1) + ...
+%             -2*im1(i  ,j-1) + 0*im1(i  ,j) + 2*im1(i  ,j+1) + ...
+%             -1*im1(i+1,j-1) + 0*im1(i+1,j) + 1*im1(i+1,j+1);
+% 
+%         % Sobel Y
+%         Iy(i,j) = ...
+%             -1*im1(i-1,j-1) -2*im1(i-1,j) -1*im1(i-1,j+1) + ...
+%              0*im1(i  ,j-1) +0*im1(i  ,j) +0*im1(i  ,j+1) + ...
+%              1*im1(i+1,j-1) +2*im1(i+1,j) +1*im1(i+1,j+1);
+% 
+%         % 時間梯度不變
+%         It(i,j) = im2(i,j) - im1(i,j);
+%     end
+% end
 % =========================
 % optical flow
 % =========================
@@ -70,23 +88,18 @@ for i = (1+w):stride:(H-w)
         wy = reshape(Iy(i-w:i+w, j-w:j+w), [], 1);
         wt = reshape(It(i-w:i+w, j-w:j+w), [], 1);
 
-        % =========================
-        % 5 sums
-        % =========================
-        % =========================
-        % 5 sums (raw)
-        % =========================
+
         raw_Ix2  = sum(wx .* wx);
         raw_Iy2  = sum(wy .* wy);
         raw_IxIy = sum(wx .* wy);
         raw_IxIt = sum(wx .* wt);
         raw_IyIt = sum(wy .* wt);
         % 
-        % % 找五個數中最大絕對值，決定需要 shift 幾位
+        % % % 找五個數中最大絕對值，決定需要 shift 幾位
         max_val = max(abs([raw_Ix2, raw_Iy2, raw_IxIy, raw_IxIt, raw_IyIt]));
 
         % 計算需要右移幾位才能讓最大值進入 15-bit（signed 16-bit 正數最多15bit）
-        if max_val <= 32767
+        if max_val <= 4095
             shift_amt = 0;
         else
             shift_amt = floor(log2(max_val)) - 14;  % 14 = 15-1
@@ -120,19 +133,44 @@ for i = (1+w):stride:(H-w)
                -sum_IyIt];
 
         detA = ATA(1,1)*ATA(2,2) - ATA(1,2)*ATA(2,1);
-
-        if abs(detA) > 0
-            invA = (1/detA) * [ ATA(2,2), -ATA(1,2);
-                              -ATA(2,1),  ATA(1,1)];
-
-            V = invA * ATb;
-
-            Vx(i,j) = V(1) * 5;
-            Vy(i,j) = V(2) * 5;
+           
+        abs_detA = abs(detA);
+        sign_detA = sign(detA);
+        
+        if abs_detA > 0 % 避免除以 0
+            % --- 找最高位 (Leading One Detection) ---
+            % 在 Verilog 中可以用 CLZ (Count Leading Zeros) 指令或迴圈找
+            k = floor(log2(double(abs_detA))); 
+            
+            % --- 計算逆矩陣的伴隨矩陣部分 ---
+            adj_11 =  ATA(2,2);
+            adj_12 = -ATA(1,2);
+            adj_21 = -ATA(2,1);
+            adj_22 =  ATA(1,1);
+            
+            % --- 矩陣乘法 ATb ---
+            temp_Vx = adj_11 * ATb(1) + adj_12 * ATb(2);
+            temp_Vy = adj_21 * ATb(1) + adj_22 * ATb(2);
+            
+            % --- 使用 Shift 取代除法 ---
+            % 這裡考慮符號位，並向右位移 k 位
+            Vx_raw = bitshift(int32(temp_Vx * sign_detA), 4 - k);
+            Vy_raw = bitshift(int32(temp_Vy * sign_detA), 4 - k);
+                        % 
+            % --- 門檻限制 (Thresholding) ---
+            if (abs(Vx_raw) > 5 || abs(Vy_raw) > 5)
+                Vx(i,j) = 0;
+                Vy(i,j) = 0;
+            else
+                Vx(i,j) = Vx_raw * mul;
+                Vy(i,j) = Vy_raw * mul;
+            end
         else
             Vx(i,j) = 0;
             Vy(i,j) = 0;
         end
+
+
 
     end
 end
@@ -142,10 +180,10 @@ fprintf("done\n");
 % =========================
 % export to Excel
 % =========================
-files = {'S_Ix2.xlsx','S_Iy2.xlsx','S_IxIy.xlsx','S_IxIt.xlsx','S_IyIt.xlsx','window_sums_all.xlsx'};
-for k = 1:length(files)
-    if isfile(files{k}), delete(files{k}); end
-end
+% files = {'S_Ix2.xlsx','S_Iy2.xlsx','S_IxIy.xlsx','S_IxIt.xlsx','S_IyIt.xlsx','window_sums_all1.xlsx'};
+% for k = 1:length(files)
+%     if isfile(files{k}), delete(files{k}); end
+% end
 % writematrix(S_Ix2,  'S_Ix2.xlsx');
 % writematrix(S_Iy2,  'S_Iy2.xlsx');
 % writematrix(S_IxIy, 'S_IxIy.xlsx');
@@ -171,12 +209,12 @@ T.Vx   = Vx_sparse(:);
 T.Vy   = Vy_sparse(:);
 T.detA = (S_Ix2(:) .* S_Iy2(:)) - (S_IxIy(:) .* S_IxIy(:));
 
-writetable(T, 'window_sums_all.xlsx');
+writetable(T, 'window_sums_all1.xlsx');
 
 % =========================
 % visualization
 % =========================
-figure('Position', [100, 100, 1600, 700]);
+figure('Position', [100, 100, 3200, 1400]);
 % 
 % subplot(1,3,1);
 % imshow(im1, []);
@@ -199,5 +237,5 @@ Vy_sparse = Vy(ys, xs);
 
 quiver(X_grid, Y_grid, Vx_sparse, Vy_sparse, 0, 'r', 'LineWidth', 0.6);
 
-title('Optical Flow no_shift');
+title('Optical Flow shift7');
 hold off;
