@@ -6,8 +6,10 @@
 module LK #(parameter width = 8)(
     input clk,
     input rst_n,
+    input in_en,
     input [width-1:0] a,
     input [width-1:0] b,
+    output valid,
     output reg [7:0] Vx,
     output reg [7:0] Vy
 );
@@ -32,7 +34,6 @@ module LK #(parameter width = 8)(
     wire [width*2+1:0] Ix_now2 = Ix_now * Ix_now;//18 = 9+9
     wire [width*2+1:0] Iy_now2 = Iy_now * Iy_now;
 
-
 // wire Ix_en = (col_reg !=1) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 Ix
 // wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //什麼時候要計算 Iy
 // wire It_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 It
@@ -42,14 +43,8 @@ wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //�
 wire It_shift = (col_reg !=6) && (col_reg !=0) && (row_reg !=0); //什麼時候要 shift It
 
 always @(*) begin
-    // Ix_now =  a - img1[(row_reg)*7 + col_reg - 2];
     Ix_now =  a - img1[12];
-end
-always @(*) begin
-    // Iy_now =  a - img1[(row_reg-2)*7 + col_reg ];
     Iy_now =  a - img1[0];
-end
-always @(*) begin
     It_now =  b - a;
 end
 // wire signed [15:0] IxIt_now = Ix_now*It[(row_reg-1)*5 + col_reg-2];
@@ -57,28 +52,72 @@ wire signed [2*width+1:0] IxIt_now = Ix_now*It[4];
 wire signed [2*width+1:0] IyIt_now = Iy_now*It[0];
 wire signed [2*width+1:0] IxIy_now = Iy_now*Ix[0];
 
-wire signed[4*width+13:0] Ix2_ext = Ix2;
-wire signed[4*width+13:0] Iy2_ext = Iy2;
-wire signed [4*width+13:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
-wire signed [4*width+13:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
-wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
-wire [4*width+13:0] det_abs = det[4*width+13]? (-det) : det;
-wire [$clog2(4*width+14)-1 : 0] LOD_pos;
-wire LOD_valid;
-LOD #(.W(4*width+14)) L1(.in(det_abs), .pos(LOD_pos), .valid(LOD_valid));
+// matrix multiplication
+reg [2 : 0] mul_counter;
+reg signed [2*width+6:0] mul_src;
+wire [2*width+6:0] mul_src_abs = mul_src[2*width+6]? -mul_src : mul_src;
+wire [$clog2(2*width+7) - 1 : 0] mul_pos;
+wire [$clog2(2*width+7) - 1 : 0] mul_pos_new;
+reg [$clog2(2*width+7) - 1 : 0] mul_pos_buffer;
+wire mul_valid;
+LOD #(.W(2*width+7)) L_mul (.in(mul_src_abs), .pos(mul_pos), .valid(mul_valid));
+assign mul_pos_new = (mul_pos > mul_pos_buffer && mul_valid)? mul_pos : mul_pos_buffer;
+always @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        mul_counter <= 0;
+        mul_src <= 0;
+    end else begin
+        mul_counter <= mul_counter + 1;
+        if(col_reg == 6 && row_reg == 5) begin 
+            case(mul_counter) 
+                3'd0: mul_src <= Ix2;
+                3'd1: mul_src <= Iy2;
+                3'd2: mul_src <= IxIy;
+                3'd3: mul_src <= IxIt;
+                3'd4: mul_src <= IyIt;
+            endcase
+        end
+    end    
+end
+always @(posedge clk or negedge rst_n) begin 
+    if(~rst_n) begin
+        mul_pos_buffer <= 0;
+    end
+    else begin 
+        if(~in_en) begin 
+            mul_pos_buffer <= mul_pos_new;
+        end
+    end
+end
+wire sum_shift = (mul_pos_buffer > 14);
+wire signed[2*width-1:0] Ix2_shift = (sum_shift)? (Ix2 >>> (mul_pos_buffer - 14)) : Ix2;
+wire signed[2*width-1:0] Iy2_shift = (sum_shift)? (Iy2 >>> (mul_pos_buffer - 14)) : Iy2;
+wire signed[2*width-1:0] IxIy_shift = (sum_shift)? (IxIy >>> (mul_pos_buffer - 14)) : IxIy;
+wire signed[2*width-1:0] IxIt_shift = (sum_shift)? (IxIt >>> (mul_pos_buffer - 14)) : IxIt;
+wire signed[2*width-1:0] IyIt_shift = (sum_shift)? (IyIt >>> (mul_pos_buffer - 14)) : IyIt;
+wire signed [4*width:0] Ux = -(Iy2_shift * IxIt_shift) + (IxIy_shift * IyIt_shift); //-(197316*36516)+(-156086*-15534) =-4780551168
+wire signed [4*width:0] Uy = -(Ix2_shift * IyIt_shift)+ (IxIy_shift * IxIt_shift);//-(341126*-15534) + (-156086*36516)
+wire signed [4*width:0] det = (Ix2_shift * Iy2_shift) - (IxIy_shift * IxIy_shift);
+
+
+// division
+wire [4*width:0] det_abs = det[4*width]? (-det) : det;
+wire [$clog2(4*width+1)-1 : 0] div_pos;
+wire div_valid;
+LOD #(.W(4*width+1)) L1(.in(det_abs), .pos(div_pos), .valid(div_valid));
 wire signed [4*width+20:0] Ux_pad = {{3{Ux[4*width+13]}}, Ux, 4'b0};
 wire signed [4*width+20:0] Uy_pad = {{3{Uy[4*width+13]}}, Uy, 4'b0};
-wire signed [4*width+20:0] shifted_x = Ux_pad >>> LOD_pos;
-wire signed [4*width+20:0] shifted_y = Uy_pad >>> LOD_pos;
+wire signed [4*width+20:0] shifted_x = Ux_pad >>> div_pos;
+wire signed [4*width+20:0] shifted_y = Uy_pad >>> div_pos;
 wire signed [7 : 0] result_x = (det[4*width+13])? -$signed(shifted_x[7 : 0]) : $signed(shifted_x[7 : 0]);
 wire signed [7 : 0] result_y = (det[4*width+13])? -$signed(shifted_y[7 : 0]) : $signed(shifted_y[7 : 0]);
 always @(*) begin 
-    if(~LOD_valid || $signed(shifted_x[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_x[4*width+20:4]) < $signed(4'b1011)) begin 
+    if(~div_valid || $signed(shifted_x[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_x[4*width+20:4]) < $signed(4'b1011)) begin 
         Vx = 8'b0;
     end
     else Vx = result_x;
 
-    if(~LOD_valid || $signed(shifted_y[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_y[4*width+20:4]) < $signed(4'b1011)) begin 
+    if(~div_valid || $signed(shifted_y[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_y[4*width+20:4]) < $signed(4'b1011)) begin 
         Vy = 8'b0;
     end
     else Vy = result_y;
@@ -147,15 +186,13 @@ always @(posedge clk or negedge rst_n) begin
         row_reg <= 0;
         col_reg <= 0;
     end else begin
-        if (col_reg == 6) begin // 0 到 6 代表 7 個數
-        col_reg <= 0;
-            if (row_reg == 6) begin
-                row_reg <= 0;
-            end else begin
-                row_reg <= row_reg + 1;
+        if(in_en) begin
+            if (col_reg == 6) begin // 0 到 6 代表 7 個數
+                col_reg <= 0;
+            end 
+            else if(~(col_reg == 5 && row_reg == 6)) begin
+                col_reg <= col_reg + 1;
             end
-        end else begin
-            col_reg <= col_reg + 1;
         end
     end    
 end
