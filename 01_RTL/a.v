@@ -66,17 +66,19 @@ wire [4*width+12:0] det_abs = det[4*width+13]? (-det) : det;
 wire [$clog2(4*width+13)-1 : 0] LOD_pos;
 wire LOD_valid;
 LOD #(.W(4*width+13)) L1(.in(det_abs), .pos(LOD_pos), .valid(LOD_valid));
-wire signed [4*width+20:0] Ux_pad0 = {{4{Ux[4*width+13]}}, Ux, 3'b0};
-wire signed [4*width+20:0] Uy_pad0 = {{4{Uy[4*width+13]}}, Uy, 3'b0};
-wire signed [7 : 0] result_x = (det[4*width+13])? -$signed(Ux_pad0[LOD_pos + 4 -: 8]) : $signed(Ux_pad0[LOD_pos + 4 -: 8]);
-wire signed [7 : 0] result_y = (det[4*width+13])? -$signed(Uy_pad0[LOD_pos + 4 -: 8]) : $signed(Uy_pad0[LOD_pos + 4 -: 8]);
+wire signed [4*width+20:0] Ux_pad = {{3{Ux[4*width+13]}}, Ux, 4'b0};
+wire signed [4*width+20:0] Uy_pad = {{3{Uy[4*width+13]}}, Uy, 4'b0};
+wire signed [4*width+20:0] shifted_x = Ux_pad >>> LOD_pos;
+wire signed [4*width+20:0] shifted_y = Uy_pad >>> LOD_pos;
+wire signed [7 : 0] result_x = (det[4*width+13])? -$signed(shifted_x[7 : 0]) : $signed(shifted_x[7 : 0]);
+wire signed [7 : 0] result_y = (det[4*width+13])? -$signed(shifted_y[7 : 0]) : $signed(shifted_y[7 : 0]);
 always @(*) begin 
-    if(~LOD_valid || result_x > $signed(8'b0101_0000) || result_x < $signed(8'b1011_0000)) begin 
+    if(~LOD_valid || $signed(shifted_x[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_x[4*width+20:4]) < $signed(4'b1011)) begin 
         Vx = 8'b0;
     end
     else Vx = result_x;
 
-    if(~LOD_valid || result_x > $signed(8'b0101_0000) || result_x < $signed(8'b1011_0000)) begin 
+    if(~LOD_valid || $signed(shifted_y[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_y[4*width+20:4]) < $signed(4'b1011)) begin 
         Vy = 8'b0;
     end
     else Vy = result_y;

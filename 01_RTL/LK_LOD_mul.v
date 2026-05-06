@@ -93,12 +93,12 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-wire sum_shift = (LOD_pos_buffer > 16);
-wire signed[2*width-1:0] Ix2_shift = (sum_shift)? (Ix2 >>> (LOD_pos_buffer - 16)) : Ix2;
-wire signed[2*width-1:0] Iy2_shift = (sum_shift)? (Iy2 >>> (LOD_pos_buffer - 16)) : Iy2;
-wire signed[2*width-1:0] IxIy_shift = (sum_shift)? (IxIy >>> (LOD_pos_buffer - 16)) : IxIy;
-wire signed[2*width-1:0] IxIt_shift = (sum_shift)? (IxIt >>> (LOD_pos_buffer - 16)) : IxIt;
-wire signed[2*width-1:0] IyIt_shift = (sum_shift)? (IyIt >>> (LOD_pos_buffer - 16)) : IyIt;
+wire sum_shift = (LOD_pos_buffer > 14);
+wire signed[2*width-1:0] Ix2_shift = (sum_shift)? (Ix2 >>> (LOD_pos_buffer - 14)) : Ix2;
+wire signed[2*width-1:0] Iy2_shift = (sum_shift)? (Iy2 >>> (LOD_pos_buffer - 14)) : Iy2;
+wire signed[2*width-1:0] IxIy_shift = (sum_shift)? (IxIy >>> (LOD_pos_buffer - 14)) : IxIy;
+wire signed[2*width-1:0] IxIt_shift = (sum_shift)? (IxIt >>> (LOD_pos_buffer - 14)) : IxIt;
+wire signed[2*width-1:0] IyIt_shift = (sum_shift)? (IyIt >>> (LOD_pos_buffer - 14)) : IyIt;
 wire signed [4*width:0] Ux = -(Iy2_shift * IxIt_shift) + (IxIy_shift * IyIt_shift); //-(197316*36516)+(-156086*-15534) =-4780551168
 wire signed [4*width:0] Uy = -(Ix2_shift * IyIt_shift)+ (IxIy_shift * IxIt_shift);//-(341126*-15534) + (-156086*36516)
 wire signed [4*width:0] det = (Ix2_shift * Iy2_shift) - (IxIy_shift * IxIy_shift);
