@@ -62,10 +62,10 @@ wire signed[4*width+13:0] Iy2_ext = Iy2;
 wire signed [4*width+13:0] Ux = -(Iy2_ext * IxIt) + (IxIy * IyIt); //-(197316*36516)+(-156086*-15534) =-4780551168
 wire signed [4*width+13:0] Uy = -(Ix2_ext * IyIt)+ (IxIy * IxIt);//-(341126*-15534) + (-156086*36516)
 wire signed [4*width+13:0] det = (Ix2_ext*Iy2) - (IxIy * IxIy);
-wire [4*width+12:0] det_abs = det[4*width+13]? (-det) : det;
-wire [$clog2(4*width+13)-1 : 0] LOD_pos;
+wire [4*width+13:0] det_abs = det[4*width+13]? (-det) : det;
+wire [$clog2(4*width+14)-1 : 0] LOD_pos;
 wire LOD_valid;
-LOD #(.W(4*width+13)) L1(.in(det_abs), .pos(LOD_pos), .valid(LOD_valid));
+LOD #(.W(4*width+14)) L1(.in(det_abs), .pos(LOD_pos), .valid(LOD_valid));
 wire signed [4*width+20:0] Ux_pad = {{3{Ux[4*width+13]}}, Ux, 4'b0};
 wire signed [4*width+20:0] Uy_pad = {{3{Uy[4*width+13]}}, Uy, 4'b0};
 wire signed [4*width+20:0] shifted_x = Ux_pad >>> LOD_pos;

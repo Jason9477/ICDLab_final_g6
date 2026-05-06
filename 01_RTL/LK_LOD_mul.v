@@ -55,12 +55,12 @@ wire signed [2*width+1:0] IxIy_now = Iy_now*Ix[0];
 
 reg [2 : 0] LOD_counter;
 reg signed [2*width+6:0] LOD_src;
-wire [2*width+5:0] LOD_src_abs = LOD_src[2*width+6]? -LOD_src : LOD_src;
-wire [$clog2(2*width+6) - 1 : 0] LOD_pos;
-wire [$clog2(2*width+6) - 1 : 0] LOD_pos_new;
-reg [$clog2(2*width+6) - 1 : 0] LOD_pos_buffer;
+wire [2*width+6:0] LOD_src_abs = LOD_src[2*width+6]? -LOD_src : LOD_src;
+wire [$clog2(2*width+7) - 1 : 0] LOD_pos;
+wire [$clog2(2*width+7) - 1 : 0] LOD_pos_new;
+reg [$clog2(2*width+7) - 1 : 0] LOD_pos_buffer;
 wire LOD_valid;
-LOD #(.W(2*width+6)) L_mul (.in(LOD_src_abs), .pos(LOD_pos), .valid(LOD_valid));
+LOD #(.W(2*width+7)) L_mul (.in(LOD_src_abs), .pos(LOD_pos), .valid(LOD_valid));
 assign LOD_pos_new = (LOD_pos > LOD_pos_buffer && LOD_valid)? LOD_pos : LOD_pos_buffer;
 
 always @(posedge clk or negedge rst_n) begin
