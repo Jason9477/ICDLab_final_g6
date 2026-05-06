@@ -189,6 +189,7 @@ always @(posedge clk or negedge rst_n) begin
         if(in_en) begin
             if (col_reg == 6) begin // 0 到 6 代表 7 個數
                 col_reg <= 0;
+                row_reg <= row_reg + 1;
             end 
             else if(~(col_reg == 5 && row_reg == 6)) begin
                 col_reg <= col_reg + 1;
@@ -242,12 +243,13 @@ module tb;
     reg [7:0] b;
     wire [15:0] c;
     reg [15:0] data_mem [0:48];
+    reg in_en;
     LK uut (
         .clk(clk),
         .rst_n(rst_n),
         .a(a),
         .b(b),
-        .c(c)
+        .in_en(in_en)
     );
     initial begin
         $dumpfile("LK.vcd");
@@ -268,7 +270,7 @@ integer i;
         rst_n = 0; // Reset active
 
         #`CYCLE; // Wait for reset to be released
-
+        in_en = 1;
         rst_n = 1; // Release reset
         for (i = 0; i < 49; i = i + 1) begin
                 {a, b} = data_mem[i];
@@ -278,8 +280,8 @@ integer i;
 
 
 
-
-
+        in_en=0;
+        #300
         $finish; // End simulation
     end
     endmodule
