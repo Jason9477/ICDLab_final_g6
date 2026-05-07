@@ -111,6 +111,8 @@ wire signed [4*width+20:0] shifted_x = Ux_pad >>> div_pos;
 wire signed [4*width+20:0] shifted_y = Uy_pad >>> div_pos;
 wire signed [7 : 0] result_x = (det[4*width+13])? -$signed(shifted_x[7 : 0]) : $signed(shifted_x[7 : 0]);
 wire signed [7 : 0] result_y = (det[4*width+13])? -$signed(shifted_y[7 : 0]) : $signed(shifted_y[7 : 0]);
+wire corner;
+Harris #(.width(width)) H1(.Ix2(Ix2_shift),.Iy2(Iy2_shift),.det(det),.corner(corner));
 always @(*) begin 
     if(~div_valid || $signed(shifted_x[4*width+20:4]) > $signed(4'b0101) || $signed(shifted_x[4*width+20:4]) < $signed(4'b1011)) begin 
         Vx = 8'b0;
@@ -234,7 +236,29 @@ module LOD #(
         end
     endgenerate
 endmodule
+module Harris#(parameter  width = 8)(
+    input [2*width-1:0] Ix2,
+    input [2*width-1:0] Iy2,
+    input [4*width:0] det,
+    output corner
+);
+    wire signed [2*width:0] trace;
 
+    assign trace = Ix2 + Iy2;
+
+    wire signed [4*width+1:0] trace_sq;
+
+    assign trace_sq = trace * trace;
+
+    wire signed [4*width+1:0] R;
+    assign R = det - (trace_sq >>> 4);
+
+    parameter signed THRESHOLD = 32'd10000;
+
+    assign corner = (R > THRESHOLD);
+
+endmodule
+    
 
 module tb;
     reg clk;
