@@ -68,7 +68,7 @@ always @(posedge clk or negedge rst_n) begin
         mul_src <= 0;
     end else begin
         mul_counter <= mul_counter + 1;
-        if(col_reg == 6 && row_reg == 5) begin 
+        if(col_reg == 6 && row_reg == 6) begin 
             case(mul_counter) 
                 3'd0: mul_src <= Ix2;
                 3'd1: mul_src <= Iy2;
@@ -188,10 +188,12 @@ always @(posedge clk or negedge rst_n) begin
     end else begin
         if(in_en) begin
             if (col_reg == 6) begin // 0 到 6 代表 7 個數
-                col_reg <= 0;
-                row_reg <= row_reg + 1;
+                if(row_reg!=6) begin
+                    col_reg <= 0;
+                    row_reg <= row_reg + 1;
+                end
             end 
-            else if(~(col_reg == 5 && row_reg == 6)) begin
+            else  begin
                 col_reg <= col_reg + 1;
             end
         end
