@@ -39,7 +39,7 @@ module LK #(parameter width = 8)(
 // wire It_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=6); //什麼時候要計算 It
 wire Ix_shift = (col_reg !=0) && (row_reg !=0); //什麼時候要 shift Ix
 wire Ix_en = Ix_shift && (col_reg !=1) && (row_reg !=6); //什麼時候要計算 Ix^2 IxIt
-wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //什麼時候要計算 Iy^2 IxIy IyIt 
+wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1)&in_en; //什麼時候要計算 Iy^2 IxIy IyIt 
 wire It_shift = (col_reg !=6) && (col_reg !=0) && (row_reg !=0); //什麼時候要 shift It
 
 always @(*) begin
