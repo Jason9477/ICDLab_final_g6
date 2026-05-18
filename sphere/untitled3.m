@@ -3,8 +3,10 @@ clc; clear; close all;
 % =========================
 % 1. 路徑與參數設定
 % =========================
-input_dir  = 'test/compressed/basketball';
-output_dir = 'output_flow_png/';
+input_dir  = 'test/compressed/MiniCooper';
+output_dir = 'output_flow_png/Minicooper';
+% input_dit ='';
+% output_dir = 'output_flow_png/';
 csv_dir    = 'output_csv_data/';
 if ~exist(output_dir, 'dir'), mkdir(output_dir); end
 if ~exist(csv_dir,    'dir'), mkdir(csv_dir);    end
@@ -16,7 +18,7 @@ window_size = 7;
 w           = floor(window_size / 2);  % w = 3
 core_size   = 5;
 stride      = 5;
-mul         = 9 ;
+mul         = 5  ;
 threshold = 1e6 ;
 % =========================
 % ★ 模式開關：'hw' 或 'sw'
@@ -33,6 +35,8 @@ for f_idx = start_frame : (end_frame - 1)
     file2 = fullfile(input_dir, sprintf('frame%02d.png', f_idx + 1));
     % file1 = fullfile('s2_wide.png');
     % file2 = fullfile('s3_wide.png');
+    % file1 = fullfile('pp1.png');
+    % file2 = fullfile('pp2.png');
     if ~exist(file1, 'file') || ~exist(file2, 'file'), continue; end
 
     im1 = double(imread(file1));
@@ -43,7 +47,7 @@ for f_idx = start_frame : (end_frame - 1)
     Ix = zeros(H, W); Iy = zeros(H, W); It = zeros(H, W);
     Ix(2:H-1, 2:W-1) = im1(2:H-1, 3:W)   - im1(2:H-1, 1:W-2);
     Iy(2:H-1, 2:W-1) = im1(3:H,   2:W-1) - im1(1:H-2, 2:W-1);
-    It(2:H-1, 2:W-1) = (im2(2:H-1, 2:W-1) - im1(2:H-1, 2:W-1)) / 2;
+    It(2:H-1, 2:W-1) = (im2(2:H-1, 2:W-1) - im1(2:H-1, 2:W-1)) ;
 
     Vx = zeros(H, W); Vy = zeros(H, W);
     ys_range = (1+w):stride:(H-w);
@@ -133,13 +137,15 @@ for f_idx = start_frame : (end_frame - 1)
                 % Step B: Harris
                 detH   = Ix2_s * Iy2_s - IxIy_s^2;
                 traceH = Ix2_s + Iy2_s;
-                R      = double(detH) - double((int64(traceH)*int64(traceH)) * 0.08125 );
+                R      = double(detH) - double((int64(traceH)*int64(traceH)) * 0.06125 );
                 detA_s = detH;
 
                 % Step C: LK 分子
                 Ux_s = -(Iy2_s * IxIt_s) + (IxIy_s * IyIt_s);
                 Uy_s = -(Ix2_s * IyIt_s) + (IxIy_s * IxIt_s);
-
+                if detA_s== 0 
+                    fprintf("aaaa")
+                end
                 if R > threshold     && detA_s > 0 && raw_detA > 0
 
                     % 理論實際值（對照用）

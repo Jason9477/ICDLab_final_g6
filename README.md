@@ -1,6 +1,7 @@
 //=============0519====================   
 sphere/video_to_frame.py 可以把彩色影片轉灰階 frame，擷取秒數、圖片大小可改
 新增測資 highway、highway_top_view、jump、people_walking、running、soccer (不過目前效果都沒有太好)
+改了一下matlab，寫tb確認RTL對上模擬結果
 //=============0516====================   
 LK_single_Vout_with_valid.v
 改成一次輸出一個 Vx 或 Vy，加上 valid (2 cycle) 
