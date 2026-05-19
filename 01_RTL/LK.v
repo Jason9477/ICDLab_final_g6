@@ -1,3 +1,7 @@
+`timescale 1ns/10ps
+`define CYCLE 10
+`define HCYCLE (`CYCLE/2.0)
+
 
 module LK #(parameter width = 8)(
     input clk,
@@ -367,7 +371,7 @@ module Harris#(parameter  width = 8)(
     wire signed [4*width+1:0] R;
     assign R = det - (trace_sq >>> 4);
 
-    reg signed [31:0] THRESHOLD = 32'd1000000;
+    reg signed [31:0] THRESHOLD = 32'd10000000;
 
     assign corner = (R > THRESHOLD);
 
