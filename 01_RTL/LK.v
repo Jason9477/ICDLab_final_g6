@@ -9,9 +9,8 @@ module LK #(parameter width = 8)(
     input in_en,
     input [7:0] a,
     input [7:0] b,
-    output valid,
-    output reg [11:0] Vx,
-    output reg [11:0] Vy
+    output reg valid,
+    output reg [11:0] Vout
 );
     // reg [7:0] img1[0:48] ;
     reg [width-1:0] img1[0:13] ;
@@ -130,13 +129,18 @@ wire signed [11 : 0] result_y = (det[4*width])? -$signed(shifted_y[11 : 0]) : $s
 reg signed  [11:0] vx_reg, vy_reg;
 wire corner;
 Harris #(.width(width)) H1(.Ix2(Ix2_shift),.Iy2(Iy2_shift),.det(det),.corner(corner));
+wire too_long = ($signed(result_x) > $signed(12'b010100000000) || 
+                 $signed(result_x) < $signed(12'b101100000000) || 
+                 $signed(result_y) > $signed(12'b010100000000) || 
+                 $signed(result_y) < $signed(12'b101100000000));
+
 always @(*) begin 
-    if(~div_valid || $signed(shifted_x[4*width+11:4]) > $signed(4'b0101) || $signed(shifted_x[4*width+11:4]) < $signed(4'b1011) && ~corner) begin 
+    if(~div_valid ||too_long || ~corner) begin 
         vx_reg = 8'b0;
     end
     else vx_reg = result_x;
 
-    if(~div_valid || $signed(shifted_y[4*width+11:4]) > $signed(4'b0101) || $signed(shifted_y[4*width+11:4]) < $signed(4'b1011) && ~corner) begin 
+    if(~div_valid || too_long || ~corner) begin 
         vy_reg = 8'b0;
     end
     else vy_reg = result_y;
@@ -179,6 +183,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 // summaiton
+reg start_valid;
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
         Iy2  <= 0;
@@ -186,24 +191,40 @@ always @(posedge clk or negedge rst_n) begin
         IxIt <= 0;
         IyIt <= 0;
         IxIy <= 0;
-        Vx <= 0;
-        Vy <= 0;
+        // Vx <= 0;
+        // Vy <= 0;
+        Vout <= 0;
         Ix2_IyIt_reg <= 0;
         Iy2_IxIt_reg <= 0;
         Ix2_Iy2_reg <= 0;
         IxIy_IyIt_reg <= 0;
         IxIy_IxIt_reg <= 0;
         IxIy2_reg <= 0;
+        valid <= 0;
+        start_valid <= 0;
     end 
     else begin
-        Vx<= vx_reg;
-        Vy<= vy_reg;
+        // Vx<= vx_reg;
+        // Vy<= vy_reg;
+        if(col_reg == 1 && row_reg == 0) begin
+            Vout <= vx_reg;
+            if(start_valid) valid <= 1;
+            else start_valid <= 1;
+        end
+        else if(col_reg == 2 && row_reg == 0) begin
+            Vout <= vy_reg;
+        end
+
+        if(col_reg == 3 && row_reg == 0) begin
+           valid <= 0;
+        end
+
         Ix2_IyIt_reg <= Ix2_IyIt;
         Iy2_IxIt_reg <= Iy2_IxIt;
         Ix2_Iy2_reg <= Ix2_Iy2;
         IxIy_IyIt_reg <= IxIy_IyIt;
         IxIy_IxIt_reg <= IxIy_IxIt;
-        IxIy2_reg <= IxIy * IxIy;
+        IxIy2_reg <= IxIy2;
         if (col_reg == 6 && row_reg == 0) begin
             Iy2  <= 0;
             Ix2  <= 0;
@@ -305,8 +326,11 @@ module Harris#(parameter  width = 8)(
     wire signed [4*width+1:0] R;
     assign R = det - (trace_sq >>> 4);
 
-    parameter signed THRESHOLD = 32'd10000;
+    reg signed [31:0] THRESHOLD = 32'd1000000;
 
     assign corner = (R > THRESHOLD);
 
 endmodule
+`timescale 1ns/10ps
+`define CYCLE 10
+`define HCYCLE 5
