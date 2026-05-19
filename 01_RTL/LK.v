@@ -44,51 +44,96 @@ wire signed [2*width+1:0] IxIt_now = Ix_now*It[4];
 wire signed [2*width+1:0] IyIt_now = Iy_now*It[0];
 wire signed [2*width+1:0] IxIy_now = Iy_now*Ix[0];
 
-// matrix multiplication
+// // matrix multiplication
+// reg [2 : 0] mul_counter;
+// reg signed [2*width+6:0] mul_src;
+// wire [2*width+6:0] mul_abs [0:4];
+
+// assign mul_abs[0] = Ix2   [2*width+6] ? -Ix2   : Ix2;
+// assign mul_abs[1] = Iy2   [2*width+6] ? -Iy2   : Iy2;
+// assign mul_abs[2] = IxIy  [2*width+6] ? -IxIy  : IxIy;
+// assign mul_abs[3] = IxIt  [2*width+6] ? -IxIt  : IxIt;
+// assign mul_abs[4] = IyIt  [2*width+6] ? -IyIt  : IyIt;
+// wire [$clog2(2*width+7) - 1 : 0] mul_pos[0:4];
+// wire [$clog2(2*width+7) - 1 : 0] pos1 = mul_pos[0];
+// wire [$clog2(2*width+7) - 1 : 0] pos2 = mul_pos[1];
+// wire [$clog2(2*width+7) - 1 : 0] pos3 = mul_pos[2];
+// wire [$clog2(2*width+7) - 1 : 0] pos4 = mul_pos[3];
+// wire [$clog2(2*width+7) - 1 : 0] pos5 = mul_pos[4];
+// wire [$clog2(2*width+7) - 1 : 0] mul_pos_new;
+// reg [$clog2(2*width+7) - 1 : 0] mul_pos_buffer;
+// wire mul_valid;
+// LOD #(.W(2*width+7)) L_mul0 (.in(mul_abs[0]), .pos(mul_pos[0]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul1 (.in(mul_abs[1]), .pos(mul_pos[1]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul2 (.in(mul_abs[2]), .pos(mul_pos[2]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul3 (.in(mul_abs[3]), .pos(mul_pos[3]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul4 (.in(mul_abs[4]), .pos(mul_pos[4]), .valid(mul_valid));
+// reg [$clog2(2*width+7)-1:0] max_val;
+// integer i;
+// always @(*) begin
+//     max_val = mul_pos[0];
+    
+//     for(i=1;i<5;i=i+1) begin
+//         if(mul_pos[i] > max_val)
+//             max_val = mul_pos[i];
+//     end
+// end
+
 reg [2 : 0] mul_counter;
 reg signed [2*width+6:0] mul_src;
-wire [2*width+6:0] mul_abs [0:4];
-
-assign mul_abs[0] = Ix2   [2*width+6] ? -Ix2   : Ix2;
-assign mul_abs[1] = Iy2   [2*width+6] ? -Iy2   : Iy2;
-assign mul_abs[2] = IxIy  [2*width+6] ? -IxIy  : IxIy;
-assign mul_abs[3] = IxIt  [2*width+6] ? -IxIt  : IxIt;
-assign mul_abs[4] = IyIt  [2*width+6] ? -IyIt  : IyIt;
-wire [$clog2(2*width+7) - 1 : 0] mul_pos[0:4];
-wire [$clog2(2*width+7) - 1 : 0] pos1 = mul_pos[0];
-wire [$clog2(2*width+7) - 1 : 0] pos2 = mul_pos[1];
-wire [$clog2(2*width+7) - 1 : 0] pos3 = mul_pos[2];
-wire [$clog2(2*width+7) - 1 : 0] pos4 = mul_pos[3];
-wire [$clog2(2*width+7) - 1 : 0] pos5 = mul_pos[4];
+wire [2*width+6:0] mul_src_abs = mul_src[2*width+6]? -mul_src : mul_src;
+wire [$clog2(2*width+7) - 1 : 0] mul_pos;
 wire [$clog2(2*width+7) - 1 : 0] mul_pos_new;
 reg [$clog2(2*width+7) - 1 : 0] mul_pos_buffer;
 wire mul_valid;
-LOD #(.W(2*width+7)) L_mul0 (.in(mul_abs[0]), .pos(mul_pos[0]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul1 (.in(mul_abs[1]), .pos(mul_pos[1]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul2 (.in(mul_abs[2]), .pos(mul_pos[2]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul3 (.in(mul_abs[3]), .pos(mul_pos[3]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul4 (.in(mul_abs[4]), .pos(mul_pos[4]), .valid(mul_valid));
-reg [$clog2(2*width+7)-1:0] max_val;
-integer i;
-always @(*) begin
-    max_val = mul_pos[0];
-    
-    for(i=1;i<5;i=i+1) begin
-        if(mul_pos[i] > max_val)
-            max_val = mul_pos[i];
+LOD #(.W(2*width+7)) L_mul (.in(mul_src_abs), .pos(mul_pos), .valid(mul_valid));
+assign mul_pos_new = (mul_pos > mul_pos_buffer && mul_valid)? mul_pos : mul_pos_buffer;
+reg mul_pos_valid;
+always @* begin
+    mul_src = 0;
+    mul_pos_valid = 0;
+    if(row_reg == 6) begin
+        case (col_reg)
+        4: begin  mul_src = Ix2; mul_pos_valid = 1; end
+        5: begin  mul_src = IxIt; mul_pos_valid = 1; end
+        6: begin  mul_src = Iy2; mul_pos_valid = 1; end
+        endcase
+    end else if(row_reg ==0) begin
+        case (col_reg) 
+            0:begin mul_src = IxIy; mul_pos_valid = 1; end
+            1:begin mul_src = IyIt; mul_pos_valid = 1; end
+        endcase
     end
+
 end
 always @(posedge clk or negedge rst_n) begin 
     if (~rst_n) begin
         mul_pos_buffer <= 0;
     end
     else begin 
-        if (col_reg == 6 && row_reg == 6) begin
-            mul_pos_buffer <= max_val;
+        if (mul_pos_valid ) begin
+            mul_pos_buffer <= mul_pos_new;
+        end else if(row_reg == 1)begin
+            mul_pos_buffer<= 0;
         end
-
     end
 end
+
+
+
+
+
+// always @(posedge clk or negedge rst_n) begin 
+//     if (~rst_n) begin
+//         mul_pos_buffer <= 0;
+//     end
+//     else begin 
+//         if (col_reg == 6 && row_reg == 6) begin
+//             mul_pos_buffer <= max_val;
+//         end
+
+//     end
+// end
 
 wire sum_shift = (mul_pos_buffer > 14);
 wire [3:0] shift_amount = (sum_shift)? (mul_pos_buffer - 14) : 0;
@@ -202,16 +247,16 @@ always @(posedge clk or negedge rst_n) begin
     else begin
         // Vx<= vx_reg;
         // Vy<= vy_reg;
-        if(col_reg == 1 && row_reg == 0) begin
+        if(col_reg == 3 && row_reg == 0) begin
             Vout <= vx_reg;
             if(start_valid) valid <= 1;
             else start_valid <= 1;
         end
-        else if(col_reg == 2 && row_reg == 0) begin
+        else if(col_reg == 4 && row_reg == 0) begin
             Vout <= vy_reg;
         end
 
-        if(col_reg == 3 && row_reg == 0) begin
+        if(col_reg == 5 && row_reg == 0) begin
            valid <= 0;
         end
 
@@ -327,6 +372,3 @@ module Harris#(parameter  width = 8)(
     assign corner = (R > THRESHOLD);
 
 endmodule
-`timescale 1ns/10ps
-`define CYCLE 10
-`define HCYCLE 5
