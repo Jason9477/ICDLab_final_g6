@@ -1,3 +1,8 @@
+`define SDFFILE    "../02_SYN/Netlist/LK_syn.sdf"
+`timescale 1ns/10ps
+`define CYCLE 10
+`define HCYCLE (`CYCLE/2.0)
+
 
 module tb;
 
