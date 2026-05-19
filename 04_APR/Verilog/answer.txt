@@ -1,0 +1,43 @@
+============================== ROUND 1 ==============================
+--- [Round 1] Raw 中間數值 ---
+raw_Ix2  :     241411 | Hex: 0003AF03
+raw_Iy2  :     247345 | Hex: 0003C631
+raw_IxIy :      10661 | Hex: 000029A5
+raw_IxIt :     -43437 | Hex: FFFF5653
+raw_IyIt :      37600 | Hex: 000092E0
+
+--- [Round 1] Scaled 16-bit ---
+Shift Amount : 3
+Ix2_s  : 75E0 | Iy2_s  : 78C6
+IxIy_s : 0534 | IxIt_s : EACA
+IyIt_s : 125C
+Ux   :  174145140 (Hex: 0A613E74)
+Uy   : -149059960 (Hex: F71D8688)
+detA :  931207344 (Hex: 378118B0)
+
+--- [Round 1] Final 1.3.8 ---
+detA MSB : 29 (Approx Divider: >> 21)
+vx_138   :    83 | Hex: 053 | 浮點近似: 0.3242
+vy_138   :   -72 | Hex: FB8 | 浮點近似: -0.2812
+
+============================== ROUND 2 ==============================
+--- [Round 2] Raw 中間數值 ---
+raw_Ix2  :     341126 | Hex: 00053486
+raw_Iy2  :     197316 | Hex: 000302C4
+raw_IxIy :    -156086 | Hex: FFFD9E4A
+raw_IxIt :      36516 | Hex: 00008EA4
+raw_IyIt :     -15534 | Hex: FFFFC352
+
+--- [Round 2] Scaled 16-bit ---
+Shift Amount : 4
+Ix2_s  : 5348 | Iy2_s  : 302C
+IxIy_s : D9E4 | IxIt_s : 08EA
+IyIt_s : FC35
+Ux   :  -18668548 (Hex: FEE323FC)
+Uy   :   -1561472 (Hex: FFE82C80)
+detA :  167738704 (Hex: 09FF7D50)
+
+--- [Round 2] Final 1.3.8 ---
+detA MSB : 27 (Approx Divider: >> 19)
+vx_138   :   -36 | Hex: FDC | 浮點近似: -0.1406
+vy_138   :    -3 | Hex: FFD | 浮點近似: -0.0117
