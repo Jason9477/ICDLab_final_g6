@@ -1,1 +1,1 @@
-vcs LK.v ../00_TB/tb.v -full64 -R +v2k -debug_access+all | tee vcs_sim.log
+vcs ../00_TB/tb.v  LK.v -full64 -R +v2k -debug_access+all | tee vcs_sim.log
