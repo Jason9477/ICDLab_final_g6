@@ -137,7 +137,7 @@ for f_idx = start_frame : (end_frame - 1)
                 % Step B: Harris
                 detH   = Ix2_s * Iy2_s - IxIy_s^2;
                 traceH = Ix2_s + Iy2_s;
-                R      = double(detH) - double((int64(traceH)*int64(traceH)) * 0.06125 );
+                R      = double(detH) - double((int64(traceH)*int64(traceH)) * 0.0625 );
                 detA_s = detH;
 
                 % Step C: LK 分子
@@ -168,7 +168,7 @@ for f_idx = start_frame : (end_frame - 1)
                     vx_final = vx_f / 256;
                     vy_final = vy_f / 256;
 
-                    if abs(vx_final) < 5 && abs(vy_final) < 5
+                    if abs(vx_final) < 5 || abs(vy_final) < 5
                         Vx(i,j) = vx_final * mul;
                         Vy(i,j) = vy_final * mul;
                     else
@@ -177,6 +177,11 @@ for f_idx = start_frame : (end_frame - 1)
                         vx_final  = 0; vy_final  = 0;
                         vx_f = 0; vy_f = 0;
                     end
+                else
+                        Vx(i,j) = 0; Vy(i,j) = 0;
+                        vx_actual = 0; vy_actual = 0;
+                        vx_final  = 0; vy_final  = 0;
+                        vx_f = 0; vy_f = 0;
                 end
             end  % MODE
 
@@ -195,11 +200,30 @@ for f_idx = start_frame : (end_frame - 1)
                  'shift_amt', 'Ix2_s', 'Iy2_s', 'IxIy_s', 'IxIt_s', 'IyIt_s', ...
                  'Harris_R', 'detA_s', 'Ux_s', 'Uy_s', 'vx_fixed', 'vy_fixed', ...
                  'Vx_phys', 'Vy_phys', 'vx_actual', 'vy_actual'};
-
+    
     T = array2table(data_matrix, 'VariableNames', col_names);
-    csv_path = fullfile(csv_dir, sprintf('%s_data_frame_%02d.csv', MODE ,f_idx));
+    csv_path = fullfile(csv_dir, sprintf('%s_data_frame_%02d.csv', MODE, f_idx));
     writetable(T, csv_path);
     fprintf('[%s] CSV Saved: %s\n', MODE, csv_path);
+    
+    % =========================
+    % 3b. 儲存 Vx/Vy 12-bit hex TXT
+    %     格式：1 sign + 3 integer + 8 fraction = 12 bit
+    %     每行一個值，vx 換行 vy 換行 vx ...
+    % =========================
+    txt_path = fullfile(csv_dir, sprintf('%s_flow_hex_frame_%02d.txt', MODE, f_idx));
+    fid = fopen(txt_path, 'w');
+    
+    for r = 1:row_cnt
+        vx_phys = data_matrix(r, 20);  % Vx_phys 欄
+        vy_phys = data_matrix(r, 21);  % Vy_phys 欄
+    
+        fprintf(fid, '%s\n', float_to_12bit_hex(vx_phys));
+        fprintf(fid, '%s\n', float_to_12bit_hex(vy_phys));
+    end
+    
+    fclose(fid);
+    fprintf('[%s] HEX TXT Saved: %s\n', MODE, txt_path);
 
     % =========================
     % 4. 繪圖與儲存 PNG
@@ -214,3 +238,23 @@ for f_idx = start_frame : (end_frame - 1)
     close(fig);
 end
 fprintf('--- 全部處理完成 [MODE = %s] ---\n', MODE);
+% =========================
+% Helper：浮點數 → 12-bit signed fixed-point hex
+%         格式：1 sign + 3 integer + 8 fraction
+%         範圍：-8.0 ~ +7.99609375，精度 1/256
+% =========================
+function hex_str = float_to_12bit_hex(val)
+    % 量化：乘以 2^8 = 256，四捨五入
+    quantized = round(val * 256);
+
+    % 夾住範圍：12-bit signed = -2048 ~ 2047
+    quantized = max(min(quantized, 2047), -2048);
+
+    % 負數轉 two's complement
+    if quantized < 0
+        quantized = quantized + 4096;  % 2^12 = 4096
+    end
+
+    % 轉成 3 位 hex（12 bit = 3 hex digits）
+    hex_str = sprintf('%03X', quantized);
+end
