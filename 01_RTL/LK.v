@@ -1,7 +1,3 @@
-`timescale 1ns/10ps
-`define CYCLE 10
-`define HCYCLE (`CYCLE/2.0)
-
 
 module LK #(parameter width = 8)(
     input clk,
