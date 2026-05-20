@@ -11,7 +11,7 @@ module CHIP ( clk, rst_n, a, b, valid, Vout);
   wire [7:0] i_data_a_i;
   wire [7:0] i_data_b_i;
   wire  i_valid_o;
-  wire [15:0] i_data_o;
+  wire [11:0] i_data_o;
   wire i_clk_p_i, i_reset_n_i;
   wire n_logic0,n_logic1;
   Lk LK_in( .clk(clk), .rst_n(rst_n), .a(i_data_a_i), .b(i_data_b_i), .valid(i_valid_o), .Vout(i_data_o) );

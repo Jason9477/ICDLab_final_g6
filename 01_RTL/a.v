@@ -1,17 +1,18 @@
+
+`define SDFFILE    "../02_SYN/Netlist/LK_syn.sdf"
 `timescale 1ns/10ps
 `define CYCLE 10
 `define HCYCLE (`CYCLE/2.0)
+`define N  74529
 
 
 module LK #(parameter width = 8)(
     input clk,
     input rst_n,
-    input in_en,
-    input [width-1:0] a,
-    input [width-1:0] b,
-    output valid,
-    output reg [11:0] Vx,
-    output reg [11:0] Vy
+    input [7:0] a,
+    input [7:0] b,
+    output reg valid,
+    output reg [11:0] Vout
 );
     // reg [7:0] img1[0:48] ;
     reg [width-1:0] img1[0:13] ;
@@ -49,51 +50,96 @@ wire signed [2*width+1:0] IxIt_now = Ix_now*It[4];
 wire signed [2*width+1:0] IyIt_now = Iy_now*It[0];
 wire signed [2*width+1:0] IxIy_now = Iy_now*Ix[0];
 
-// matrix multiplication
+// // matrix multiplication
+// reg [2 : 0] mul_counter;
+// reg signed [2*width+6:0] mul_src;
+// wire [2*width+6:0] mul_abs [0:4];
+
+// assign mul_abs[0] = Ix2   [2*width+6] ? -Ix2   : Ix2;
+// assign mul_abs[1] = Iy2   [2*width+6] ? -Iy2   : Iy2;
+// assign mul_abs[2] = IxIy  [2*width+6] ? -IxIy  : IxIy;
+// assign mul_abs[3] = IxIt  [2*width+6] ? -IxIt  : IxIt;
+// assign mul_abs[4] = IyIt  [2*width+6] ? -IyIt  : IyIt;
+// wire [$clog2(2*width+7) - 1 : 0] mul_pos[0:4];
+// wire [$clog2(2*width+7) - 1 : 0] pos1 = mul_pos[0];
+// wire [$clog2(2*width+7) - 1 : 0] pos2 = mul_pos[1];
+// wire [$clog2(2*width+7) - 1 : 0] pos3 = mul_pos[2];
+// wire [$clog2(2*width+7) - 1 : 0] pos4 = mul_pos[3];
+// wire [$clog2(2*width+7) - 1 : 0] pos5 = mul_pos[4];
+// wire [$clog2(2*width+7) - 1 : 0] mul_pos_new;
+// reg [$clog2(2*width+7) - 1 : 0] mul_pos_buffer;
+// wire mul_valid;
+// LOD #(.W(2*width+7)) L_mul0 (.in(mul_abs[0]), .pos(mul_pos[0]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul1 (.in(mul_abs[1]), .pos(mul_pos[1]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul2 (.in(mul_abs[2]), .pos(mul_pos[2]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul3 (.in(mul_abs[3]), .pos(mul_pos[3]), .valid(mul_valid));
+// LOD #(.W(2*width+7)) L_mul4 (.in(mul_abs[4]), .pos(mul_pos[4]), .valid(mul_valid));
+// reg [$clog2(2*width+7)-1:0] max_val;
+// integer i;
+// always @(*) begin
+//     max_val = mul_pos[0];
+    
+//     for(i=1;i<5;i=i+1) begin
+//         if(mul_pos[i] > max_val)
+//             max_val = mul_pos[i];
+//     end
+// end
+
 reg [2 : 0] mul_counter;
 reg signed [2*width+6:0] mul_src;
-wire [2*width+6:0] mul_abs [0:4];
-
-assign mul_abs[0] = Ix2   [2*width+6] ? -Ix2   : Ix2;
-assign mul_abs[1] = Iy2   [2*width+6] ? -Iy2   : Iy2;
-assign mul_abs[2] = IxIy  [2*width+6] ? -IxIy  : IxIy;
-assign mul_abs[3] = IxIt  [2*width+6] ? -IxIt  : IxIt;
-assign mul_abs[4] = IyIt  [2*width+6] ? -IyIt  : IyIt;
-wire [$clog2(2*width+7) - 1 : 0] mul_pos[0:4];
-wire [$clog2(2*width+7) - 1 : 0] pos1 = mul_pos[0];
-wire [$clog2(2*width+7) - 1 : 0] pos2 = mul_pos[1];
-wire [$clog2(2*width+7) - 1 : 0] pos3 = mul_pos[2];
-wire [$clog2(2*width+7) - 1 : 0] pos4 = mul_pos[3];
-wire [$clog2(2*width+7) - 1 : 0] pos5 = mul_pos[4];
+wire [2*width+6:0] mul_src_abs = mul_src[2*width+6]? -mul_src : mul_src;
+wire [$clog2(2*width+7) - 1 : 0] mul_pos;
 wire [$clog2(2*width+7) - 1 : 0] mul_pos_new;
 reg [$clog2(2*width+7) - 1 : 0] mul_pos_buffer;
 wire mul_valid;
-LOD #(.W(2*width+7)) L_mul0 (.in(mul_abs[0]), .pos(mul_pos[0]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul1 (.in(mul_abs[1]), .pos(mul_pos[1]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul2 (.in(mul_abs[2]), .pos(mul_pos[2]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul3 (.in(mul_abs[3]), .pos(mul_pos[3]), .valid(mul_valid));
-LOD #(.W(2*width+7)) L_mul4 (.in(mul_abs[4]), .pos(mul_pos[4]), .valid(mul_valid));
-reg [$clog2(2*width+7)-1:0] max_val;
-integer i;
-always @(*) begin
-    max_val = mul_pos[0];
-    
-    for(i=1;i<5;i=i+1) begin
-        if(mul_pos[i] > max_val)
-            max_val = mul_pos[i];
+LOD #(.W(2*width+7)) L_mul (.in(mul_src_abs), .pos(mul_pos), .valid(mul_valid));
+assign mul_pos_new = (mul_pos > mul_pos_buffer && mul_valid)? mul_pos : mul_pos_buffer;
+reg mul_pos_valid;
+always @* begin
+    mul_src = 0;
+    mul_pos_valid = 0;
+    if(row_reg == 6) begin
+        case (col_reg)
+        4: begin  mul_src = Ix2; mul_pos_valid = 1; end
+        5: begin  mul_src = IxIt; mul_pos_valid = 1; end
+        6: begin  mul_src = Iy2; mul_pos_valid = 1; end
+        endcase
+    end else if(row_reg ==0) begin
+        case (col_reg) 
+            0:begin mul_src = IxIy; mul_pos_valid = 1; end
+            1:begin mul_src = IyIt; mul_pos_valid = 1; end
+        endcase
     end
+
 end
 always @(posedge clk or negedge rst_n) begin 
     if (~rst_n) begin
         mul_pos_buffer <= 0;
     end
     else begin 
-        if (col_reg == 6 && row_reg == 6) begin
-            mul_pos_buffer <= max_val;
+        if (mul_pos_valid ) begin
+            mul_pos_buffer <= mul_pos_new;
+        end else if(row_reg == 1)begin
+            mul_pos_buffer<= 0;
         end
-
     end
 end
+
+
+
+
+
+// always @(posedge clk or negedge rst_n) begin 
+//     if (~rst_n) begin
+//         mul_pos_buffer <= 0;
+//     end
+//     else begin 
+//         if (col_reg == 6 && row_reg == 6) begin
+//             mul_pos_buffer <= max_val;
+//         end
+
+//     end
+// end
 
 wire sum_shift = (mul_pos_buffer > 14);
 wire [3:0] shift_amount = (sum_shift)? (mul_pos_buffer - 14) : 0;
@@ -102,10 +148,19 @@ wire signed[2*width-1:0] Iy2_shift =  (Iy2 >>> shift_amount) ;
 wire signed[2*width-1:0] IxIy_shift = (IxIy >>> shift_amount) ;
 wire signed[2*width-1:0] IxIt_shift = (IxIt >>> shift_amount) ;
 wire signed[2*width-1:0] IyIt_shift = (IyIt >>> shift_amount) ;
-wire signed [4*width:0] Ux = -(Iy2_shift * IxIt_shift) + (IxIy_shift * IyIt_shift); //-(197316*36516)+(-156086*-15534) =-4780551168
-wire signed [4*width:0] Uy = -(Ix2_shift * IyIt_shift)+ (IxIy_shift * IxIt_shift);//-(341126*-15534) + (-156086*36516)
-wire signed [4*width:0] det = (Ix2_shift * Iy2_shift) - (IxIy_shift * IxIy_shift);
-
+// wire signed [4*width:0] Ux = -(Iy2_shift * IxIt_shift) + (IxIy_shift * IyIt_shift); //-(197316*36516)+(-156086*-15534) =-4780551168
+// wire signed [4*width:0] Uy = -(Ix2_shift * IyIt_shift)+ (IxIy_shift * IxIt_shift);//-(341126*-15534) + (-156086*36516)
+// wire signed [4*width:0] det = (Ix2_shift * Iy2_shift) - (IxIy_shift * IxIy_shift);
+reg signed [4*width-1:0] Iy2_IxIt_reg, Ix2_IyIt_reg, Ix2_Iy2_reg,IxIy_IyIt_reg, IxIy_IxIt_reg,IxIy2_reg;
+wire signed [4*width-1:0] Iy2_IxIt = Iy2_shift * IxIt_shift;
+wire signed [4*width-1:0] Ix2_IyIt = Ix2_shift * IyIt_shift;
+wire signed [4*width-1:0] Ix2_Iy2 = Ix2_shift * Iy2_shift;
+wire signed [4*width-1:0] IxIy_IyIt = IxIy_shift * IyIt_shift;
+wire signed [4*width-1:0] IxIy_IxIt = IxIy_shift * IxIt_shift;
+wire signed [4*width-1:0] IxIy2 = IxIy_shift * IxIy_shift;
+wire signed [4*width:0] Ux = -Iy2_IxIt_reg + IxIy_IyIt_reg; //-(197316*36516)+(-156086*-15534) =-4780551168
+wire signed [4*width:0] Uy = -Ix2_IyIt_reg + IxIy_IxIt_reg;//-(341126*-15534) + (-156086*36516)
+wire signed [4*width:0] det = Ix2_Iy2_reg - IxIy2_reg;//(Ix2_shift * Iy2_shift) - (IxIy_shift * IxIy_shift);
 
 // division
 wire [4*width:0] det_abs = det[4*width]? (-det) : det;
@@ -118,20 +173,24 @@ wire signed [4*width+11:0] shifted_x = Ux_pad >>> div_pos;
 wire signed [4*width+11:0] shifted_y = Uy_pad >>> div_pos;
 wire signed [11 : 0] result_x = (det[4*width])? -$signed(shifted_x[11 : 0]) : $signed(shifted_x[11 : 0]);
 wire signed [11 : 0] result_y = (det[4*width])? -$signed(shifted_y[11 : 0]) : $signed(shifted_y[11 : 0]);
-
-// corner detection
+reg signed  [11:0] vx_reg, vy_reg;
 wire corner;
 Harris #(.width(width)) H1(.Ix2(Ix2_shift),.Iy2(Iy2_shift),.det(det),.corner(corner));
-always @(*) begin 
-    if(~div_valid || $signed(shifted_x[4*width+11:4]) > $signed(4'b0101) || $signed(shifted_x[4*width+11:4]) < $signed(4'b1011) && ~corner) begin 
-        Vx = 8'b0;
-    end
-    else Vx = result_x;
+wire too_long = ($signed(result_x) > $signed(12'b010100000000) || 
+                 $signed(result_x) < $signed(12'b101100000000) || 
+                 $signed(result_y) > $signed(12'b010100000000) || 
+                 $signed(result_y) < $signed(12'b101100000000));
 
-    if(~div_valid || $signed(shifted_y[4*width+11:4]) > $signed(4'b0101) || $signed(shifted_y[4*width+11:4]) < $signed(4'b1011) && ~corner) begin 
-        Vy = 8'b0;
+always @(*) begin 
+    if(~div_valid ||too_long || ~corner) begin 
+        vx_reg = 8'b0;
     end
-    else Vy = result_y;
+    else vx_reg = result_x;
+
+    if(~div_valid || too_long || ~corner) begin 
+        vy_reg = 8'b0;
+    end
+    else vy_reg = result_y;
 end
 
 
@@ -171,6 +230,7 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 // summaiton
+reg start_valid;
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
         Iy2  <= 0;
@@ -178,8 +238,40 @@ always @(posedge clk or negedge rst_n) begin
         IxIt <= 0;
         IyIt <= 0;
         IxIy <= 0;
+        // Vx <= 0;
+        // Vy <= 0;
+        Vout <= 0;
+        Ix2_IyIt_reg <= 0;
+        Iy2_IxIt_reg <= 0;
+        Ix2_Iy2_reg <= 0;
+        IxIy_IyIt_reg <= 0;
+        IxIy_IxIt_reg <= 0;
+        IxIy2_reg <= 0;
+        valid <= 0;
+        start_valid <= 0;
     end 
     else begin
+        // Vx<= vx_reg;
+        // Vy<= vy_reg;
+        if(col_reg == 3 && row_reg == 0) begin
+            Vout <= vx_reg;
+            if(start_valid) valid <= 1;
+            else start_valid <= 1;
+        end
+        else if(col_reg == 4 && row_reg == 0) begin
+            Vout <= vy_reg;
+        end
+
+        if(col_reg == 5 && row_reg == 0) begin
+           valid <= 0;
+        end
+
+        Ix2_IyIt_reg <= Ix2_IyIt;
+        Iy2_IxIt_reg <= Iy2_IxIt;
+        Ix2_Iy2_reg <= Ix2_Iy2;
+        IxIy_IyIt_reg <= IxIy_IyIt;
+        IxIy_IxIt_reg <= IxIy_IxIt;
+        IxIy2_reg <= IxIy2;
         if (col_reg == 6 && row_reg == 0) begin
             Iy2  <= 0;
             Ix2  <= 0;
@@ -188,6 +280,7 @@ always @(posedge clk or negedge rst_n) begin
             IxIy <= 0;
         end 
         else begin
+
             // 正常的累加邏輯
             if (Iy_en) begin
                 Iy2  <= Iy2  + Iy_now2;
@@ -280,60 +373,212 @@ module Harris#(parameter  width = 8)(
     wire signed [4*width+1:0] R;
     assign R = det - (trace_sq >>> 4);
 
-    parameter signed THRESHOLD = 32'd10000;
+    reg signed [31:0] THRESHOLD = 32'd10000000;
 
     assign corner = (R > THRESHOLD);
 
 endmodule
-    
 
 module tb;
-    reg clk;
-    reg rst_n;
-    reg [7:0] a;
-    reg [7:0] b;
-    wire [15:0] c;
-    reg [15:0] data_mem [0:97];
-    reg in_en;
-    LK uut (
-        .clk(clk),
-        .rst_n(rst_n),
-        .a(a),
-        .b(b),
-        .in_en(in_en)
-    );
-    initial begin
-        $dumpfile("LK.vcd");
-        $dumpvars();
-        // $fsdbDumpfile("LK.fsdb");
-        // $fsdbDumpvars("+mda", tb, uut);
 
-    end
-    initial begin
-        clk = 0;
-        a=0;
-        b=0;
-    end
-    always #`HCYCLE clk = ~clk; // Clock generation
+reg clk;
+reg rst_n;
+reg [7:0] a,b;
+
+wire valid;
+wire [11:0] Vout;
+
+reg [7:0] a_mem [0:(`N-1)];
+reg [7:0] b_mem [0:(`N-1)];
+reg signed [11:0] answer_mem [0:(`N-1)];
+
 integer i;
-    initial begin
-        $readmemh("input_combined.txt", data_mem);
-        rst_n = 0; // Reset active
+integer ans_idx;
+integer error_cnt;
 
-        #`CYCLE; // Wait for reset to be released
-        in_en = 1;
-        rst_n = 1; // Release reset
-        for (i = 0; i < 98; i = i + 1) begin
-                {a, b} = data_mem[i];
-                #`CYCLE;   // 一個 cycle
+LK uut(
+    .clk(clk),
+    .rst_n(rst_n),
+    .a(a),
+    .b(b),
+    .valid(valid),
+    .Vout(Vout)
+);
+
+//////////////////////////////////////////////////
+// dump
+//////////////////////////////////////////////////
+
+initial begin
+    // $dumpfile("LK.vcd");
+    // $dumpvars();
+    $fsdbDumpfile("LK.fsdb");
+    $fsdbDumpvars("+mda", tb, uut);
+end
+
+
+//////////////////////////////////////////////////
+// clock
+//////////////////////////////////////////////////
+
+initial begin
+    clk = 0;
+    a   = 0;
+    b   = 0;
+end
+
+always #`HCYCLE clk = ~clk;
+
+
+//////////////////////////////////////////////////
+// compare variables
+//////////////////////////////////////////////////
+
+reg signed [11:0] prev_Vout;
+reg prev_valid;
+
+real vout1_decimal;
+real vout2_decimal;
+real ans1_decimal;
+real ans2_decimal;
+
+
+//////////////////////////////////////////////////
+// compare output with answer
+//////////////////////////////////////////////////
+always @(posedge clk) begin
+
+    if(valid) begin
+        
+        if(prev_valid) begin
+            $display("\n===== Compare #%0d ~ #%0d =====",ans_idx,ans_idx+1);
+            // Q3.8 -> decimal
+            vout1_decimal = $signed(prev_Vout)/256.0;
+            vout2_decimal = $signed(Vout)/256.0;
+
+            ans1_decimal =
+                answer_mem[ans_idx]/256.0;
+
+            ans2_decimal =
+                answer_mem[ans_idx+1]/256.0;
+
+
+            /////////////////////////////////////
+            // compare prev_Vout
+            /////////////////////////////////////
+
+            if($signed(prev_Vout)
+                != answer_mem[ans_idx]) begin
+                
+                error_cnt = error_cnt + 1;
+
+                $display("\nERROR idx=%0d",
+                         ans_idx);
+
+                $display(
+                "Expected=%b (%f)",
+                answer_mem[ans_idx],
+                ans1_decimal);
+
+                $display(
+                "Got     =%b (%f)",
+                prev_Vout,
+                vout1_decimal);
+
             end
 
 
+            /////////////////////////////////////
+            // compare current Vout
+            /////////////////////////////////////
+
+            if($signed(Vout) != answer_mem[ans_idx+1]) begin
+                
+                error_cnt = error_cnt + 1;
+
+                $display("\nERROR idx=%0d",
+                         ans_idx+1);
+
+                $display(
+                "Expected=%b (%f)",
+                answer_mem[ans_idx+1],
+                ans2_decimal);
+
+                $display(
+                "Got     =%b (%f)",
+                Vout,
+                vout2_decimal);
+
+            end
 
 
-        in_en=0;
-        #300
-        $finish; // End simulation
+            ans_idx = ans_idx + 2;
+
+        end
+
+        prev_Vout  <= Vout;
+        prev_valid <= 1;
+
     end
-    endmodule
 
+    else begin
+        prev_valid <= 0;
+    end
+
+end
+
+
+//////////////////////////////////////////////////
+// stimulus
+//////////////////////////////////////////////////
+
+initial begin
+
+    $readmemh("a.txt",a_mem);
+    $readmemh("b.txt",b_mem);
+
+    // answer.txt 一行一個12bit hex
+    $readmemh("answer.txt",answer_mem);
+
+    rst_n = 0;
+    ans_idx = 0;
+    error_cnt = 0;
+
+    #`CYCLE;
+    rst_n = 1;
+
+
+    for(i=0;i<`N;i=i+1) begin
+
+        a = a_mem[i];
+        b = b_mem[i];
+
+        #`CYCLE;
+
+    end
+
+
+
+    #(6*`CYCLE);
+
+    //////////////////////////////////////////
+    // summary
+    //////////////////////////////////////////
+
+    $display("");
+    $display("===============");
+    $display("Total Error=%0d",
+             error_cnt);
+
+    if(error_cnt==0)
+        $display("ALL PASS");
+    else
+        $display("FAIL");
+
+    $display("===============");
+
+    $finish;
+
+end
+
+endmodule
