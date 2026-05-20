@@ -1,3 +1,5 @@
+//=============0520====================   
+cycle time 最緊3.56
 //=============0519====================   
 sphere/video_to_frame.py 可以把彩色影片轉灰階 frame，擷取秒數、圖片大小可改
 新增測資 highway、highway_top_view、jump、people_walking、running、soccer (不過目前效果都沒有太好)
