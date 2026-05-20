@@ -2,7 +2,6 @@
 module LK #(parameter width = 8)(
     input clk,
     input rst_n,
-    input in_en,
     input [7:0] a,
     input [7:0] b,
     output reg valid,
