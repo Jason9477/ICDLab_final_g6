@@ -1,4 +1,5 @@
 
+
 module CHIP ( clk, rst_n, a, b, valid, Vout);
   input [7:0] a;
   input [7:0] b;
@@ -14,7 +15,7 @@ module CHIP ( clk, rst_n, a, b, valid, Vout);
   wire [11:0] i_data_o;
   wire i_clk_p_i, i_reset_n_i;
   wire n_logic0,n_logic1;
-  Lk LK_in( .clk(clk), .rst_n(rst_n), .a(i_data_a_i), .b(i_data_b_i), .valid(i_valid_o), .Vout(i_data_o) );
+  Lk LK_in( .clk(i_clk_p_i), .rst_n(i_reset_n_i), .a(i_data_a_i), .b(i_data_b_i), .valid(i_valid_o), .Vout(i_data_o) );
   
   TIE0 ipad_n_logic0(.O(n_logic0));
   TIE1 ipad_n_logic1(.O(n_logic1));
