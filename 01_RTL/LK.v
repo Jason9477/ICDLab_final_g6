@@ -27,6 +27,21 @@ module LK #(parameter width = 8)(
     reg signed [width:0] It_now;
     wire [width*2+1:0] Ix_now2 = Ix_now * Ix_now;//18 = 9+9
     wire [width*2+1:0] Iy_now2 = Iy_now * Iy_now;
+    reg [width-1:0] a_reg, b_reg;
+    wire [7:0] ig0 = img1[0];
+    wire [7:0] ig1 = img1[1];
+    wire [7:0] ig2 = img1[2];
+    wire [7:0] ig3 = img1[3];
+    wire [7:0] ig4 = img1[4];
+    wire [7:0] ig5 = img1[5];
+    wire [7:0] ig6 = img1[6];
+    wire [7:0] ig7 = img1[7];
+    wire [7:0] ig8 = img1[8];
+    wire [7:0] ig9 = img1[9];
+    wire [7:0] ig10 = img1[10];
+    wire [7:0] ig11 = img1[11];
+    wire [7:0] ig12 = img1[12];
+    wire [7:0] ig13 = img1[13];
 
 wire Ix_shift = (col_reg !=0) && (row_reg !=0); //什麼時候要 shift Ix
 wire Ix_en = Ix_shift && (col_reg !=1) && (row_reg !=6); //什麼時候要計算 Ix^2 IxIt
@@ -34,9 +49,9 @@ wire Iy_en = (col_reg !=6) && (col_reg !=0) && (row_reg !=0 && row_reg !=1); //�
 wire It_shift = (col_reg !=6) && (col_reg !=0) && (row_reg !=0); //什麼時候要 shift It
 
 always @(*) begin
-    Ix_now =  a - img1[12];
-    Iy_now =  a - img1[0];
-    It_now =  b - a;
+    Ix_now =  a_reg - img1[12];
+    Iy_now =  a_reg - img1[0];
+    It_now =  b_reg - a_reg;
 end
 // wire signed [15:0] IxIt_now = Ix_now*It[(row_reg-1)*5 + col_reg-2];
 wire signed [2*width+1:0] IxIt_now = Ix_now*It[4];
@@ -204,7 +219,7 @@ always @(posedge clk or negedge rst_n) begin
         for(j = 0; j <= 12; j = j + 1) begin 
             img1[j] <= img1[j + 1];
         end 
-        img1[13] <= a;
+        img1[13] <= a_reg;
 
         if(Ix_shift) begin
             for(j = 0; j <= 3; j = j + 1) begin 
@@ -242,10 +257,14 @@ always @(posedge clk or negedge rst_n) begin
         IxIy2_reg <= 0;
         valid <= 0;
         start_valid <= 0;
+        a_reg <= 0;
+        b_reg <= 0;
     end 
     else begin
         // Vx<= vx_reg;
         // Vy<= vy_reg;
+        a_reg <= a;
+        b_reg <= b;
         if(col_reg == 3 && row_reg == 0) begin
             Vout <= vx_reg;
             if(start_valid) valid <= 1;
@@ -292,8 +311,8 @@ end
 // input matrix index
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        row_reg <= 0;
-        col_reg <= 0;
+        row_reg <= 6;
+        col_reg <= 6;
     end else begin
 
         if (col_reg == 6) begin // 0 到 6 代表 7 個數

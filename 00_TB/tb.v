@@ -35,10 +35,10 @@ LK uut(
 //////////////////////////////////////////////////
 
 initial begin
-    // $dumpfile("LK.vcd");
-    // $dumpvars();
-    $fsdbDumpfile("LK.fsdb");
-    $fsdbDumpvars("+mda", tb, uut);
+    $dumpfile("LK.vcd");
+    $dumpvars();
+    // $fsdbDumpfile("LK.fsdb");
+    // $fsdbDumpvars("+mda", tb, uut);
 end
 
 
@@ -169,7 +169,7 @@ initial begin
     ans_idx = 0;
     error_cnt = 0;
 
-    #`CYCLE;
+    #(`CYCLE*0.4);
     rst_n = 1;
 
 

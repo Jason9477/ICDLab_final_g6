@@ -1,6 +1,6 @@
 ###################################################################
 
-# Created by write_sdc on Wed May 20 19:53:24 2026
+# Created by write_sdc on Fri May 22 01:28:07 2026
 
 ###################################################################
 set sdc_version 2.1
@@ -22,7 +22,7 @@ set_load -pin_load 10 [get_ports {Vout[3]}]
 set_load -pin_load 10 [get_ports {Vout[2]}]
 set_load -pin_load 10 [get_ports {Vout[1]}]
 set_load -pin_load 10 [get_ports {Vout[0]}]
-create_clock [get_ports clk]  -period 3.56  -waveform {0 1.78}
+create_clock [get_ports clk]  -period 3.6  -waveform {0 1.8}
 set_clock_latency 0.5  [get_clocks clk]
 set_clock_uncertainty 0.1  [get_clocks clk]
 set_input_delay -clock clk  -max 1  [get_ports clk]
