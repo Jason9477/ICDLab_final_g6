@@ -28,20 +28,6 @@ module LK #(parameter width = 8)(
     wire [width*2+1:0] Ix_now2 = Ix_now * Ix_now;//18 = 9+9
     wire [width*2+1:0] Iy_now2 = Iy_now * Iy_now;
     reg [width-1:0] a_reg, b_reg;
-    wire [7:0] ig0 = img1[0];
-    wire [7:0] ig1 = img1[1];
-    wire [7:0] ig2 = img1[2];
-    wire [7:0] ig3 = img1[3];
-    wire [7:0] ig4 = img1[4];
-    wire [7:0] ig5 = img1[5];
-    wire [7:0] ig6 = img1[6];
-    wire [7:0] ig7 = img1[7];
-    wire [7:0] ig8 = img1[8];
-    wire [7:0] ig9 = img1[9];
-    wire [7:0] ig10 = img1[10];
-    wire [7:0] ig11 = img1[11];
-    wire [7:0] ig12 = img1[12];
-    wire [7:0] ig13 = img1[13];
 
 wire Ix_shift = (col_reg !=0) && (row_reg !=0); //什麼時候要 shift Ix
 wire Ix_en = Ix_shift && (col_reg !=1) && (row_reg !=6); //什麼時候要計算 Ix^2 IxIt
@@ -149,13 +135,14 @@ end
 //     end
 // end
 
-wire sum_shift = (mul_pos_buffer > 14);
-wire [3:0] shift_amount = (sum_shift)? (mul_pos_buffer - 14) : 0;
-wire signed[2*width-1:0] Ix2_shift = (Ix2 >>> shift_amount);
-wire signed[2*width-1:0] Iy2_shift =  (Iy2 >>> shift_amount) ;
-wire signed[2*width-1:0] IxIy_shift = (IxIy >>> shift_amount) ;
-wire signed[2*width-1:0] IxIt_shift = (IxIt >>> shift_amount) ;
-wire signed[2*width-1:0] IyIt_shift = (IyIt >>> shift_amount) ;
+wire sum_shift = (mul_pos_new > 14);
+wire [3:0] shift_amount = (sum_shift)? (mul_pos_new - 14) : 0;
+reg [3:0] shift_amount_reg;
+wire signed[2*width-1:0] Ix2_shift = (Ix2 >>> shift_amount_reg);
+wire signed[2*width-1:0] Iy2_shift =  (Iy2 >>> shift_amount_reg) ;
+wire signed[2*width-1:0] IxIy_shift = (IxIy >>> shift_amount_reg) ;
+wire signed[2*width-1:0] IxIt_shift = (IxIt >>> shift_amount_reg) ;
+wire signed[2*width-1:0] IyIt_shift = (IyIt >>> shift_amount_reg) ;
 // wire signed [4*width:0] Ux = -(Iy2_shift * IxIt_shift) + (IxIy_shift * IyIt_shift); //-(197316*36516)+(-156086*-15534) =-4780551168
 // wire signed [4*width:0] Uy = -(Ix2_shift * IyIt_shift)+ (IxIy_shift * IxIt_shift);//-(341126*-15534) + (-156086*36516)
 // wire signed [4*width:0] det = (Ix2_shift * Iy2_shift) - (IxIy_shift * IxIy_shift);
@@ -183,7 +170,7 @@ wire signed [11 : 0] result_x = (det[4*width])? -$signed(shifted_x[11 : 0]) : $s
 wire signed [11 : 0] result_y = (det[4*width])? -$signed(shifted_y[11 : 0]) : $signed(shifted_y[11 : 0]);
 reg signed  [11:0] vx_reg, vy_reg;
 wire corner;
-Harris #(.width(width)) H1(.Ix2(Ix2_shift),.Iy2(Iy2_shift),.det(det),.corner(corner));
+Harris #(.width(width)) H1(.Ix2(Ix2_shift),.Iy2(Iy2_shift),.det(det),.corner(corner),.clk(clk),.rst_n(rst_n));
 wire too_long = ($signed(result_x) > $signed(12'b010100000000) || 
                  $signed(result_x) < $signed(12'b101100000000) || 
                  $signed(result_y) > $signed(12'b010100000000) || 
@@ -259,12 +246,14 @@ always @(posedge clk or negedge rst_n) begin
         start_valid <= 0;
         a_reg <= 0;
         b_reg <= 0;
+        shift_amount_reg <= 0;
     end 
     else begin
         // Vx<= vx_reg;
         // Vy<= vy_reg;
         a_reg <= a;
         b_reg <= b;
+        shift_amount_reg <= shift_amount;
         if(col_reg == 3 && row_reg == 0) begin
             Vout <= vx_reg;
             if(start_valid) valid <= 1;
@@ -371,22 +360,33 @@ endmodule
 module Harris#(parameter  width = 8)(
     input [2*width-1:0] Ix2,
     input [2*width-1:0] Iy2,
-    input [4*width:0] det,
+    input  [4*width:0] det,
+    input clk,
+    input rst_n,
     output corner
 );
-    wire signed [2*width:0] trace;
+    wire  [2*width:0] trace;
 
     assign trace = Ix2 + Iy2;
 
-    wire signed [4*width+1:0] trace_sq;
+    wire  [4*width+1:0] trace_sq;
 
     assign trace_sq = trace * trace;
+    reg  [4*width+1:0] trace_sq_reg;
 
     wire signed [4*width+1:0] R;
-    assign R = det - (trace_sq >>> 4);
+    assign R = $signed(det) - $signed(trace_sq_reg>>> 4);
 
     reg signed [31:0] THRESHOLD = 32'd10000000;
 
     assign corner = (R > THRESHOLD);
+    always @(posedge clk or negedge rst_n) begin
+        if(~rst_n) begin
+            trace_sq_reg <= 0;
+        end
+        else begin
+            trace_sq_reg <= trace_sq;
+        end
+    end
 
 endmodule
