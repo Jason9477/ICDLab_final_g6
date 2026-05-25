@@ -50,5 +50,5 @@ report_timing -path full -delay max > timing_LK.out
 #write -format db -hierarchy -output $active_design.db
 write -format verilog -hierarchy -output LK_syn.v
 write_sdf -version 2.1 -context verilog LK_syn.sdf
-write_sdc LK.sdc
+write_sdc CHIP.sdc
 write -format ddc -hierarchy -output "LK_syn.ddc"
