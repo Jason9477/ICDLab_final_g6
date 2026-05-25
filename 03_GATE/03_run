@@ -1,1 +1,1 @@
-vcs ../00_TB/tb.v ../02_SYN/LK_syn.v ../02_SYN/fsa0m_a_generic_core_21.lib.src -full64 -R -debug_access+all +v2k +define+SDF
+vcs ../00_TB/tb.v ../02_SYN/LK_syn.v ../02_SYN/fsa0m_a_generic_core_21.lib.src -full64 -R -debug_access+all +v2k +define+SDF +neg_tchk
