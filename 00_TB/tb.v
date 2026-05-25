@@ -1,4 +1,4 @@
-`define SDFFILE    "../02_SYN/Netlist/LK_syn.sdf"
+`define SDFFILE    "../02_SYN/LK_syn.sdf"
 `timescale 1ns/10ps
 `define CYCLE 10
 `define HCYCLE (`CYCLE/2.0)
@@ -30,6 +30,15 @@ LK uut(
     .valid(valid),
     .Vout(Vout)
 );
+
+//////////////////////////////////////////////////
+// SDF annotation
+//////////////////////////////////////////////////
+
+`ifdef SDF
+initial $sdf_annotate(`SDFFILE, uut);
+`endif
+
 
 //////////////////////////////////////////////////
 // dump
