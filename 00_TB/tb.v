@@ -4,6 +4,7 @@
 `define HCYCLE (`CYCLE/2.0)
 `define N  74529
 
+
 module tb;
 
 reg clk;
@@ -76,7 +77,15 @@ always @(posedge clk) begin
     if(valid) begin
         
         if(prev_valid) begin
-            $display("\n===== Compare #%0d ~ #%0d =====",ans_idx,ans_idx+1);
+             $display("\n===== Compare #%0d ~ #%0d =====",ans_idx,ans_idx+1);
+             $display(
+                "Expected=%b (%f)",
+                answer_mem[ans_idx+1],
+                ans2_decimal);
+                $display(
+                "Got     =%b (%f)",
+                Vout,
+                vout2_decimal);
             // Q3.8 -> decimal
             vout1_decimal = $signed(prev_Vout)/256.0;
             vout2_decimal = $signed(Vout)/256.0;
@@ -93,8 +102,8 @@ always @(posedge clk) begin
             /////////////////////////////////////
 
             if($signed(prev_Vout)
-                != answer_mem[ans_idx]) begin
-                
+                !== answer_mem[ans_idx]) begin
+               
                 error_cnt = error_cnt + 1;
 
                 $display("\nERROR idx=%0d",
@@ -117,7 +126,7 @@ always @(posedge clk) begin
             // compare current Vout
             /////////////////////////////////////
 
-            if($signed(Vout) != answer_mem[ans_idx+1]) begin
+            if($signed(Vout) !== answer_mem[ans_idx+1]) begin
                 
                 error_cnt = error_cnt + 1;
 
@@ -159,11 +168,11 @@ end
 
 initial begin
 
-    $readmemh("a.txt",a_mem);
-    $readmemh("b.txt",b_mem);
+    $readmemh("../00_TB/a_kitti.txt",a_mem);
+    $readmemh("../00_TB/b_kitti.txt",b_mem);
 
     // answer.txt 一行一個12bit hex
-    $readmemh("answer.txt",answer_mem);
+    $readmemh("../00_TB/ans_kitti.txt",answer_mem);
 
     rst_n = 0;
     ans_idx = 0;
