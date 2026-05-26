@@ -1,0 +1,1 @@
+vcs ../00_TB/tb_post_sim.v ../04_APR/CHIP.v -v ../04_APR/Verilog/fsa0m_a_generic_core_21.lib.src ../04_APR/Verilog/fsa0m_a_t33_generic_io_21.lib.src  -full64 -R -debug_access+all +v2k +define+SDF +neg_tchk
