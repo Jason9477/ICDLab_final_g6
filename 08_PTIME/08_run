@@ -1,0 +1,4 @@
+#!/bin/tcsh -f
+source /usr/cad/synopsys/CIC/primetime.cshrc
+sed -e 's/^current_design/# current_design/g' -e 's/\[get_designs {CHIP}\]/[current_design]/g' CHIP_postAPR.sdc > CHIP_pt.sdc
+pt_shell -f pt_script_apr_sdc.tcl

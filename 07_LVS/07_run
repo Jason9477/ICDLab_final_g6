@@ -1,0 +1,4 @@
+#!/bin/tcsh -f
+source /usr/mentor/CIC/calibre.cshrc
+v2lvs -l core.v -l umc18_io_lvs.v -s core.spi -s umc18_io_lvs.spi -v CHIP.v -o CHIP.spi   
+calibre -lvs -hier -auto G-DF-MIXED_MODE_RFCMOS18-1.8V_3.3V-1P6M-MMC_CALIBRE-LVS-2.1-P8.txt
