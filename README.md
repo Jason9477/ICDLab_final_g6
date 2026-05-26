@@ -1,7 +1,7 @@
 //=============0526====================   
 03_GATE/03_run vcs 加上 +neg_tchk
 00_TB/tb_post_sim.v  05_POST/05_run：跑 post-layout simulation 用
-06/DRC  07/LVS  08/PTIME
+06_DRC  07_LVS  08_PTIME
 //=============0520====================   
 cycle time 最緊3.56
 //=============0519====================   
