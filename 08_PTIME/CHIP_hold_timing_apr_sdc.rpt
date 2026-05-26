@@ -1,0 +1,342 @@
+****************************************
+Report : timing
+	-path_type full
+	-delay_type min
+	-slack_lesser_than 999.00
+	-max_paths 10
+	-sort_by slack
+Design : CHIP
+Version: U-2022.12
+Date   : Wed May 27 01:00:08 2026
+****************************************
+
+
+  Startpoint: LK_in/M2/R_113
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/M2/s2_result_reg[9]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_11/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                                 Incr       Path
+  ----------------------------------------------------------------------------
+  clock clk (rise edge)                                 0.00       0.00
+  clock network delay (propagated)                      0.73 *     0.73
+  LK_in/M2/R_113/CK (QDFFRBN)                           0.00       0.73 r
+  LK_in/M2/R_113/Q (QDFFRBN)                            0.18 *     0.90 r
+  LK_in/M2/U157/S (FA1S)                                0.12 *     1.02 r
+  LK_in/M2/s2_result_reg[9]/D (QDFFRBN)                 0.00 *     1.02 r
+  data arrival time                                                1.02
+
+  clock clk (rise edge)                                 0.00       0.00
+  clock network delay (propagated)                      0.51 *     0.51
+  clock reconvergence pessimism                         0.00       0.51
+  clock uncertainty                                     0.10       0.61
+  LK_in/M2/s2_result_reg[9]/CK (QDFFRBN)                           0.61 r
+  library hold time                                     0.00 *     0.61
+  data required time                                               0.61
+  ----------------------------------------------------------------------------
+  data required time                                               0.61
+  data arrival time                                               -1.02
+  ----------------------------------------------------------------------------
+  slack (MET)                                                      0.40
+
+
+  Startpoint: LK_in/M2/R_111
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/M2/s2_result_reg[11]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L2_1/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                                  Incr       Path
+  -----------------------------------------------------------------------------
+  clock clk (rise edge)                                  0.00       0.00
+  clock network delay (propagated)                       0.73 *     0.73
+  LK_in/M2/R_111/CK (QDFFRBN)                            0.00       0.73 r
+  LK_in/M2/R_111/Q (QDFFRBN)                             0.18 *     0.90 r
+  LK_in/M2/intadd_143/U21/S (FA1S)                       0.11 *     1.02 r
+  LK_in/M2/s2_result_reg[11]/D (QDFFRBN)                 0.00 *     1.02 r
+  data arrival time                                                 1.02
+
+  clock clk (rise edge)                                  0.00       0.00
+  clock network delay (propagated)                       0.51 *     0.51
+  clock reconvergence pessimism                          0.00       0.51
+  clock uncertainty                                      0.10       0.61
+  LK_in/M2/s2_result_reg[11]/CK (QDFFRBN)                           0.61 r
+  library hold time                                      0.00 *     0.61
+  data required time                                                0.61
+  -----------------------------------------------------------------------------
+  data required time                                                0.61
+  data arrival time                                                -1.02
+  -----------------------------------------------------------------------------
+  slack (MET)                                                       0.40
+
+
+  Startpoint: LK_in/It_reg[1][2]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/It_reg[1][2]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_7/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/It_reg[1][2]/CK (QDFFRBN)                    0.00       0.71 r
+  LK_in/It_reg[1][2]/Q (QDFFRBN)                     0.16 *     0.87 r
+  LK_in/FE_PHC3144_It_1_2/O (BUF1CK)                 0.06 *     0.93 r
+  LK_in/U4857/O (MUX2)                               0.09 *     1.02 r
+  LK_in/It_reg[1][2]/D (QDFFRBN)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/It_reg[1][2]/CK (QDFFRBN)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+
+  Startpoint: LK_in/M2/R_112
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/M2/s2_result_reg[10]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L2_1/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                                  Incr       Path
+  -----------------------------------------------------------------------------
+  clock clk (rise edge)                                  0.00       0.00
+  clock network delay (propagated)                       0.73 *     0.73
+  LK_in/M2/R_112/CK (QDFFRBN)                            0.00       0.73 r
+  LK_in/M2/R_112/Q (QDFFRBN)                             0.18 *     0.90 r
+  LK_in/M2/intadd_143/U22/S (FA1S)                       0.12 *     1.02 r
+  LK_in/M2/s2_result_reg[10]/D (QDFFRBN)                 0.00 *     1.02 r
+  data arrival time                                                 1.02
+
+  clock clk (rise edge)                                  0.00       0.00
+  clock network delay (propagated)                       0.51 *     0.51
+  clock reconvergence pessimism                          0.00       0.51
+  clock uncertainty                                      0.10       0.61
+  LK_in/M2/s2_result_reg[10]/CK (QDFFRBN)                           0.61 r
+  library hold time                                      0.00 *     0.61
+  data required time                                                0.61
+  -----------------------------------------------------------------------------
+  data required time                                                0.61
+  data arrival time                                                -1.02
+  -----------------------------------------------------------------------------
+  slack (MET)                                                       0.41
+
+
+  Startpoint: LK_in/Ix_reg[4][2]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/Ix_reg[3][2]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_6/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/Ix_reg[4][2]/CK (QDFFRBS)                    0.00       0.71 r
+  LK_in/Ix_reg[4][2]/Q (QDFFRBS)                     0.16 *     0.87 r
+  LK_in/FE_PHC3185_Ix_4_2/O (BUF1CK)                 0.06 *     0.93 r
+  LK_in/U5375/O (MUX2)                               0.09 *     1.02 r
+  LK_in/Ix_reg[3][2]/D (QDFFRBN)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/Ix_reg[3][2]/CK (QDFFRBN)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+
+  Startpoint: LK_in/It_reg[1][1]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/It_reg[1][1]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_7/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/It_reg[1][1]/CK (QDFFRBS)                    0.00       0.71 r
+  LK_in/It_reg[1][1]/Q (QDFFRBS)                     0.16 *     0.87 r
+  LK_in/FE_PHC3190_It_1_1/O (BUF1CK)                 0.06 *     0.93 r
+  LK_in/U4856/O (MUX2)                               0.09 *     1.02 r
+  LK_in/It_reg[1][1]/D (QDFFRBS)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/It_reg[1][1]/CK (QDFFRBS)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+
+  Startpoint: LK_in/It_reg[2][0]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/It_reg[2][0]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_7/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/It_reg[2][0]/CK (QDFFRBN)                    0.00       0.71 r
+  LK_in/It_reg[2][0]/Q (QDFFRBN)                     0.16 *     0.88 r
+  LK_in/FE_PHC3145_It_2_0/O (BUF1CK)                 0.06 *     0.94 r
+  LK_in/U4844/O (MUX2)                               0.09 *     1.02 r
+  LK_in/It_reg[2][0]/D (QDFFRBN)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/It_reg[2][0]/CK (QDFFRBN)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+
+  Startpoint: LK_in/It_reg[1][4]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/It_reg[1][4]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_7/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/It_reg[1][4]/CK (QDFFRBN)                    0.00       0.71 r
+  LK_in/It_reg[1][4]/Q (QDFFRBN)                     0.16 *     0.88 r
+  LK_in/FE_PHC3161_It_1_4/O (BUF1CK)                 0.06 *     0.94 r
+  LK_in/U4859/O (MUX2)                               0.09 *     1.02 r
+  LK_in/It_reg[1][4]/D (QDFFRBN)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/It_reg[1][4]/CK (QDFFRBN)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+
+  Startpoint: LK_in/It_reg[2][0]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/It_reg[1][0]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_7/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/It_reg[2][0]/CK (QDFFRBN)                    0.00       0.71 r
+  LK_in/It_reg[2][0]/Q (QDFFRBN)                     0.16 *     0.88 r
+  LK_in/FE_PHC3145_It_2_0/O (BUF1CK)                 0.06 *     0.94 r
+  LK_in/U4855/O (MUX2)                               0.09 *     1.02 r
+  LK_in/It_reg[1][0]/D (QDFFRBN)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/It_reg[1][0]/CK (QDFFRBN)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+
+  Startpoint: LK_in/Ix_reg[2][1]
+               (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: LK_in/Ix_reg[1][1]
+               (rising edge-triggered flip-flop clocked by clk)
+  Last common pin: LK_in/CTS_ccl_a_INV_clk_G0_L5_6/O
+  Path Group: clk
+  Path Type: min
+
+  Point                                              Incr       Path
+  -------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.71 *     0.71
+  LK_in/Ix_reg[2][1]/CK (QDFFRBN)                    0.00       0.71 r
+  LK_in/Ix_reg[2][1]/Q (QDFFRBN)                     0.16 *     0.87 r
+  LK_in/FE_PHC3136_Ix_2_1/O (BUF1CK)                 0.06 *     0.93 r
+  LK_in/U5394/O (MUX2)                               0.09 *     1.02 r
+  LK_in/Ix_reg[1][1]/D (QDFFRBN)                     0.00 *     1.02 r
+  data arrival time                                             1.02
+
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (propagated)                   0.51 *     0.51
+  clock reconvergence pessimism                      0.00       0.51
+  clock uncertainty                                  0.10       0.61
+  LK_in/Ix_reg[1][1]/CK (QDFFRBN)                               0.61 r
+  library hold time                                  0.00 *     0.61
+  data required time                                            0.61
+  -------------------------------------------------------------------------
+  data required time                                            0.61
+  data arrival time                                            -1.02
+  -------------------------------------------------------------------------
+  slack (MET)                                                   0.41
+
+Warning: report_timing has satisfied the max_paths criteria. There are 1062 further endpoints which have paths of interest with slack less than   999.00 that were not considered when generating this report. (UITE-502)
+
+1

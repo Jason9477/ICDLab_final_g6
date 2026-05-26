@@ -1,0 +1,38 @@
+****************************************
+Report : Time Based Power
+Design : CHIP
+Version: U-2022.12
+Date   : Wed May 27 01:00:08 2026
+****************************************
+
+
+
+  Attributes
+  ----------
+      i  -  Including register clock pin internal power
+      u  -  User defined power group
+
+                        Internal  Switching  Leakage    Total
+Power Group             Power     Power      Power      Power   (     %)  Attrs
+--------------------------------------------------------------------------------
+clock_network           5.670e-03 2.846e-03 9.772e-09 8.516e-03 (32.26%)  i
+register                2.065e-03 5.764e-04 2.615e-07 2.642e-03 (10.01%)  
+combinational           5.732e-03 8.537e-03 7.767e-07    0.0143 (54.05%)  
+sequential                 0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
+memory                     0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
+io_pad                  6.007e-04 3.716e-04 2.664e-07 9.726e-04 ( 3.68%)  
+black_box                  0.0000    0.0000    0.0000    0.0000 ( 0.00%)  
+
+  Net Switching Power  =    0.0123   (46.71%)
+  Cell Internal Power  =    0.0141   (53.29%)
+  Cell Leakage Power   = 1.314e-06   ( 0.00%)
+                         ---------
+Total Power            =    0.0264  (100.00%)
+
+X Transition Power     =    0.0000
+Glitching Power        =    0.0000
+
+Peak Power             =    2.9465
+Peak Time              = 627065.611
+
+1
