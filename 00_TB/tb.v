@@ -1,6 +1,6 @@
 `define SDFFILE    "../02_SYN/LK_syn.sdf"
 `timescale 1ns/10ps
-`define CYCLE 5
+`define CYCLE 3.5
 `define HCYCLE (`CYCLE/2.0)
 `define N  74529
 
@@ -186,8 +186,7 @@ initial begin
     rst_n = 0;
     ans_idx = 0;
     error_cnt = 0;
-
-    #(`CYCLE);
+    #(`CYCLE*0.8);
     rst_n = 1;
 
 
