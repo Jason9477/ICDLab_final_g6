@@ -1,6 +1,6 @@
 `define SDFFILE    "../02_SYN/LK_syn.sdf"
 `timescale 1ns/10ps
-`define CYCLE 3.5
+`define CYCLE 3
 `define HCYCLE (`CYCLE/2.0)
 `define N  74529
 
@@ -22,7 +22,7 @@ integer i;
 integer ans_idx;
 integer error_cnt;
 
-LK uut(
+CHIP uut(
     .clk(clk),
     .rst_n(rst_n),
     .a(a),
@@ -87,14 +87,14 @@ always @(posedge clk) begin
         
         if(prev_valid) begin
              $display("\n===== Compare #%0d ~ #%0d =====",ans_idx,ans_idx+1);
-            //  $display(
-            //     "Expected=%b (%f)",
-            //     answer_mem[ans_idx+1],
-            //     ans2_decimal);
-            //     $display(
-            //     "Got     =%b (%f)",
-            //     Vout,
-            //     vout2_decimal);
+             $display(
+                "Expected=%b (%f)",
+                answer_mem[ans_idx+1],
+                ans2_decimal);
+                $display(
+                "Got     =%b (%f)",
+                Vout,
+                vout2_decimal);
             // Q3.8 -> decimal
             vout1_decimal = $signed(prev_Vout)/256.0;
             vout2_decimal = $signed(Vout)/256.0;
@@ -186,7 +186,7 @@ initial begin
     rst_n = 0;
     ans_idx = 0;
     error_cnt = 0;
-    #(`CYCLE*0.8);
+    #(`CYCLE*1.8);
     rst_n = 1;
 
 
