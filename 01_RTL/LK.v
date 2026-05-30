@@ -153,13 +153,6 @@ wire signed[2*width-1:0] IyIt_shift = (IyIt >>> shift_amount_reg) ;
 // wire signed [4*width-1:0] IxIy_IxIt = IxIy_shift * IxIt_shift;
 // wire signed [4*width-1:0] IxIy2 = IxIy_shift * IxIy_shift;
 wire signed [4*width-1:0] Iy2_IxIt, Ix2_IyIt, Ix2_Iy2, IxIy_IyIt, IxIy_IxIt, IxIy2;
-
-// DW02_mult_2_stage #(16, 16) U0 ( .A(Ix2_shift),   .B(IyIt_shift),   .TC(1'b1), .CLK(clk),   .PRODUCT(Ix2_IyIt) );
-// DW02_mult_2_stage #(16, 16) U1 ( .A(Ix2_shift),   .B(Iy2_shift),   .TC(1'b1), .CLK(clk),   .PRODUCT(Ix2_Iy2) );
-// DW02_mult_2_stage #(16, 16) U2 ( .A(Iy2_shift),   .B(IxIt_shift),   .TC(1'b1), .CLK(clk),   .PRODUCT(Iy2_IxIt) );
-// DW02_mult_2_stage #(16, 16) U3 ( .A(IxIy_shift),   .B(IyIt_shift),   .TC(1'b1), .CLK(clk),   .PRODUCT(IxIy_IyIt) );
-// DW02_mult_2_stage #(16, 16) U4 ( .A(IxIy_shift),   .B(IxIt_shift),   .TC(1'b1), .CLK(clk),   .PRODUCT(IxIy_IxIt) );
-// DW02_mult_2_stage #(16, 16) U5 ( .A(IxIy_shift),   .B(IxIy_shift),   .TC(1'b1), .CLK(clk),   .PRODUCT(IxIy2) );
 mult_pipe M1 (.clk(clk), .rst_n(rst_n), .A(Iy2_shift), .B(IxIt_shift), .result(Iy2_IxIt));
 mult_pipe M2 (.clk(clk), .rst_n(rst_n), .A(Ix2_shift), .B(IyIt_shift), .result(Ix2_IyIt));
 mult_pipe M3 (.clk(clk), .rst_n(rst_n), .A(Ix2_shift), .B(Iy2_shift), .result(Ix2_Iy2));
@@ -379,22 +372,49 @@ module Harris#(parameter width = 8)(
 
 wire [2*width:0] trace;
 assign trace = Ix2 + Iy2;
+
+wire [7:0] trace_hi = trace[2*width:width+1];
+wire [8:0] trace_lo = trace[width:0];
+
+reg [17:0] s1_P0;
+reg [16:0] s1_P1;
+reg [15:0] s1_P2;
 reg [4*width:0] s1_det;
 
 always @(posedge clk or negedge rst_n) begin
     if (~rst_n) begin
+        s1_P0  <= 0;
+        s1_P1  <= 0;
+        s1_P2  <= 0;
         s1_det <= 0;
     end else begin
+        s1_P0  <= trace_lo * trace_lo;
+        s1_P1  <= trace_hi * trace_lo;
+        s1_P2  <= trace_hi * trace_hi;
         s1_det <= det;
     end
 end
 
-wire [4*width+1:0] trace_sq;
-dw02_mult_3_stage #(17, 17) U7 ( .A(trace),   .B(trace),   .TC(1'b1), .CLK(clk),   .PRODUCT(trace_sq) );
+wire [4*width+1:0] trace_sq,trace_sq1,trace_sq2;
+assign trace_sq1 = {{(2*width-16){1'b0}}, s1_P0}+ ({{(2*width-15){1'b0}}, s1_P1} << (width+1));
+assign trace_sq2 = ({{(2*width-15){1'b0}}, s1_P1} << (width+1)) + ({{(2*width-14){1'b0}}, s1_P2} << (2*width+2));
+assign trace_sq = trace_sq1 + trace_sq2;
 
+reg [4*width+1:0] trace_sq_reg;
+reg [4*width:0]   det_reg;
+
+always @(posedge clk or negedge rst_n) begin
+    if (~rst_n) begin
+        trace_sq_reg <= 0;
+        det_reg      <= 0;
+    end else begin
+        trace_sq_reg <= trace_sq;
+        det_reg      <= s1_det;
+    end
+end
 
 wire signed [4*width+1:0] R;
-assign R = $signed(s1_det) - $signed(trace_sq >>> 4);
+assign R = $signed(det_reg) - $signed(trace_sq_reg >>> 4);
 
 localparam signed [31:0] THRESHOLD = 32'd10000000;
 assign corner = (R > THRESHOLD);
